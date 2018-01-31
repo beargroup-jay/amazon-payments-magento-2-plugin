@@ -30,6 +30,7 @@ class Login extends Template
     {
         $this->coreHelper = $coreHelper;
         parent::__construct($context);
+        $this->coreHelper->updateCurrentUrl($context->getUrlBuilder()->getCurrentUrl());
     }
 
     protected function _toHtml()

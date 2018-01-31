@@ -21,6 +21,7 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Module\ModuleListInterface;
+use Magento\Framework\Session\SessionManagerInterface;
 
 class Data extends AbstractHelper
 {
@@ -82,25 +83,32 @@ class Data extends AbstractHelper
     protected $moduleList;
 
     /**
+     * @var SessionManagerInterface
+     */
+    private $coreSession;
+    /**
      * Data constructor.
      * @param ModuleListInterface $moduleList
      * @param Context $context
      * @param EncryptorInterface $encryptor
      * @param StoreManagerInterface $storeManager
      * @param ClientIp $clientIpHelper
+     * @param SessionManagerInterface $coreSession
      */
     public function __construct(
         ModuleListInterface $moduleList,
         Context $context,
         EncryptorInterface $encryptor,
         StoreManagerInterface $storeManager,
-        ClientIp $clientIpHelper
+        ClientIp $clientIpHelper,
+        SessionManagerInterface $coreSession
     ) {
         parent::__construct($context);
         $this->moduleList = $moduleList;
         $this->encryptor      = $encryptor;
         $this->storeManager   = $storeManager;
         $this->clientIpHelper = $clientIpHelper;
+        $this->coreSession = $coreSession;
     }
 
     /*
@@ -700,4 +708,31 @@ class Data extends AbstractHelper
             return null;
         }
     }
+
+    /**
+     * Sets current page of Amazon login button so it can be returned to.
+     * @param $url
+     */
+    public function updateCurrentUrl($url = '') {
+
+            $this->coreSession->start();
+            $this->coreSession->setCurrentUrl($url);
+
+    }
+
+    /**
+     * Gets stored URL of page visited before Amazon Auth started
+     * @return string
+     */
+    public function getStoredUrl() {
+        $url = '';
+
+        $this->coreSession->start();
+        if($this->coreSession->getCurrentUrl($url)) {
+            $url = $this->coreSession->getCurrentUrl();
+        }
+
+        return $url;
+    }
+
 }

@@ -32,10 +32,15 @@ class CheckoutController
      */
     protected $url;
 
-    public function __construct(Session $session, UrlInterface $url)
+    private $coreHelper;
+
+    public function __construct(Session $session, UrlInterface $url, \Amazon\Core\Helper\Data $coreHelper)
     {
         $this->session = $session;
         $this->url     = $url;
+
+        $this->coreHelper = $coreHelper;
+        $this->coreHelper->updateCurrentUrl($url->getCurrentUrl());
     }
 
     public function afterExecute(Index $index, ResultInterface $result)
