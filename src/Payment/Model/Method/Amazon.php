@@ -324,24 +324,19 @@ class Amazon extends AbstractMethod
     {
         $amazonOrderReferenceId = $this->getAmazonOrderReferenceId($payment);
         $storeId                = $payment->getOrder()->getStoreId();
-        // now hardcoded to always be SYNC_THEN_ASYNC
-        //  $authMode               = $this->amazonCoreHelper->getAuthorizationMode(ScopeInterface::SCOPE_STORE, $storeId);
-        $async                  = true;
+        $authMode               = $this->amazonCoreHelper->getAuthorizationMode(ScopeInterface::SCOPE_STORE, $storeId);
+        $async                  = (AuthorizationMode::ASYNC === $authMode);
 
         try {
             try {
                 $this->_authorize($payment, $amount, $amazonOrderReferenceId, $storeId, $capture, $async);
             } catch (TransactionTimeoutException $e) {
-                /*
                 if (AuthorizationMode::SYNC_THEN_ASYNC === $authMode) {
                     $async = true;
                     $this->_authorize($payment, $amount, $amazonOrderReferenceId, $storeId, $capture, $async);
                 } else {
                     throw $e;
                 }
-                */
-                // A catch in this case means something is very wrong since we don't have different modes now
-                throw $e;
             }
         } catch (SoftDeclineException $e) {
             $this->processSoftDecline();

@@ -42,6 +42,23 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '1.0.0', '<=')) {
             $this->addQuoteTableDirtyFlagAttribute($setup);
         }
+
+        // Used update query because all scopes needed to have this value updated and this is a fast, simple approach
+        if (version_compare($context->getVersion(), '1.2.5', '<')) {
+
+            $sql = "SELECT c.config_id 
+                    FROM core_config_data c 
+                    WHERE c.path = 'payment/amazon_payment/authorization_mode' AND c.value = 'asynchronous'";
+
+            $result = $setup->getConnection()->fetchAll($sql);
+
+            foreach ($result as $row) {
+                $sql = "UPDATE core_config_data SET value='synchronous_possible' WHERE config_id = ".$row['config_id'];
+                $setup->getConnection()->query($sql);
+
+            }
+
+        }
     }
 
     /**

@@ -337,7 +337,11 @@ class Data extends AbstractHelper
      */
     public function getAuthorizationMode($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
-        return 'synchronous_possible';
+        return $this->scopeConfig->getValue(
+            'payment/amazon_payment/authorization_mode',
+            $scope,
+            $scopeCode
+        );
     }
 
     /*
