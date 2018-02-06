@@ -32,6 +32,10 @@ class CheckoutController
      */
     protected $url;
 
+
+    /**
+     * @var Data
+     */
     private $coreHelper;
 
     public function __construct(Session $session, UrlInterface $url, \Amazon\Core\Helper\Data $coreHelper)
