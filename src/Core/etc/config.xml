@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
+        <!--
         <payment>
             <amazon_payment>
                 <active>1</active>
                 <is_gateway>1</is_gateway>
                 <title>Amazon Pay</title>
                 <sort_order>1</sort_order>
+                <model>AmazonFacade</model>
                 <model>Amazon\Payment\Model\Method\Amazon</model>
                 <order_status>pending_payment</order_status>
                 <payment_action>authorize</payment_action>
@@ -27,5 +29,6 @@
                 <logging>1</logging>
             </amazon_payment>
         </payment>
+-->
     </default>
 </config>

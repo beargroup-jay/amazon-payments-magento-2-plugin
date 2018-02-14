@@ -86,6 +86,7 @@ class Data extends AbstractHelper
      * @var SessionManagerInterface
      */
     private $coreSession;
+
     /**
      * Data constructor.
      * @param ModuleListInterface $moduleList
