@@ -15,25 +15,56 @@
  */
 namespace Amazon\Payment\Gateway\Request;
 
-use Magento\Payment\Gateway\ConfigInterface;
+use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Framework\App\ProductMetadata;
+use Amazon\Core\Helper\Data;
+use Magento\Quote\Api\CartRepositoryInterface;
+use \Magento\Checkout\Model\Session;
+use Amazon\Payment\Api\Data\QuoteLinkInterfaceFactory;
 
 class CaptureRequest implements BuilderInterface
 {
     /**
-     * @var ConfigInterface
+     * @var ConfigInterface|ConfigProvider
      */
-    private $config;
+    private $_config;
+
+    /**
+     * @var Data
+     */
+    private $_coreHelper;
+
+    /**
+     * @var ProductMetadata
+     */
+    private $_productMetaData;
+
+    private $_quoteRepository;
+
+    private $_checkoutSession;
+
+    private $_quoteLinkFactory;
 
     /**
      * @param ConfigInterface $config
      */
     public function __construct(
-        ConfigInterface $config
+        ConfigProvider $config,
+        Data $coreHelper,
+        ProductMetaData $productMetadata,
+        CartRepositoryInterface $quoteRepository,
+        Session $checkoutSession,
+        QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
     ) {
-        $this->config = $config;
+        $this->_config = $config;
+        $this->_coreHelper = $coreHelper;
+        $this->_productMetaData = $productMetadata;
+        $this->_quoteRepository = $quoteRepository;
+        $this->_checkoutSession = $checkoutSession;
+        $this->_quoteLinkFactory = $quoteLinkInterfaceFactory;
     }
 
     /**
@@ -55,12 +86,35 @@ class CaptureRequest implements BuilderInterface
 
         $order = $paymentDO->getOrder();
 
+        $quote = $this->_checkoutSession->getQuote();
+        $amazonId = $this->getAmazonId($quote->getId());
+
         $payment = $paymentDO->getPayment();
+
+
 
         if (!$payment instanceof OrderPaymentInterface) {
             throw new \LogicException('Order payment should be provided.');
         }
 
+      // $storeName = $this->_coreHelper->getStoreName('store', $order->getStoreId());
+
+
+        $data = [
+            'amazon_order_reference_id' => $amazonId,
+            'amount'                    => $order->getGrandTotalAmount(),
+            'currency_code'             => $order->getCurrencyCode(),
+            'seller_order_id'           => $order->getOrderIncrementId(),
+            'store_name'                => $quote->getStore()->getName(),
+            'custom_information'        =>
+                'Magento Version : ' . $this->_productMetaData->getVersion() . ' ' .
+                'Plugin Version : ' . $this->_coreHelper->getVersion()
+            ,
+            'platform_id'               => $this->_config->getPlatformId()
+        ];
+
+        return $data;
+        /*
         return [
             'TXN_TYPE' => 'S',
             'TXN_ID' => $payment->getLastTransId(),
@@ -69,5 +123,14 @@ class CaptureRequest implements BuilderInterface
                 $order->getStoreId()
             )
         ];
+        */
+    }
+
+    private function getAmazonId($quoteId)
+    {
+        $quoteLink = $this->_quoteLinkFactory->create();
+        $quoteLink->load($quoteId, 'quote_id');
+
+        return $quoteLink->getAmazonOrderReferenceId();
     }
 }

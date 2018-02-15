@@ -18,7 +18,7 @@ namespace Amazon\Payment\Gateway\Http\Client;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Amazon\Payment\Model\Adapter\AmazonAdapter;
+use Amazon\Core\Client\ClientFactoryInterface;
 
 class Client implements ClientInterface
 {
@@ -38,17 +38,17 @@ class Client implements ClientInterface
      */
     private $logger;
 
-    private $_adapter;
+    private $_clientFactory;
 
     /**
      * @param Logger $logger
      */
     public function __construct(
         Logger $logger,
-        AmazonAdapter $adapter
+        ClientFactoryInterface $clientFactory
     ) {
         $this->logger = $logger;
-        $this->_adapter = $adapter;
+        $this->_clientFactory = $clientFactory;
     }
 
     /**
@@ -65,7 +65,7 @@ class Client implements ClientInterface
             'request' => $data,
             'client' => static::class
         ];
-        $response['object'] = [];
+
 
         $response = $this->generateResponseForCode(
             $this->getResultCode(

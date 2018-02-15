@@ -82,7 +82,9 @@
     <!-- Capture Request -->
     <type name="Amazon\Payment\Gateway\Request\CaptureRequest">
         <arguments>
-            <argument name="config" xsi:type="object">AmazonConfig</argument>
+            <argument name="config" xsi:type="object">Amazon\Payment\Model\Ui\ConfigProvider</argument>
+            <argument name="coreHelper" xsi:type="object">Amazon\Core\Helper\Data</argument>
+            <argument name="productMetadata" xsi:type="object">Magento\Framework\App\ProductMetadata</argument>
         </arguments>
     </type>
 
@@ -133,6 +135,7 @@
             <argument name="config" xsi:type="object">AmazonConfig</argument>
         </arguments>
     </type>
+
     <!-- end gateway config -->
 
     <preference for="Amazon\Payment\Api\OrderInformationManagementInterface" type="Amazon\Payment\Model\OrderInformationManagement" />

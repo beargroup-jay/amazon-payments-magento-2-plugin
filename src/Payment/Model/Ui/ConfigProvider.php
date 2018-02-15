@@ -22,6 +22,7 @@ class ConfigProvider implements ConfigProviderInterface
 {
     const CODE = 'amazon_payment';
 
+    const PLATFORM_ID = 'A2ZAYEJU54T1BM';
     /**
      * Retrieve assoc array of checkout configuration
      *
@@ -39,5 +40,9 @@ class ConfigProvider implements ConfigProviderInterface
                 ]
             ]
         ];
+    }
+
+    public function getPlatformId() {
+        return self::PLATFORM_ID;
     }
 }
