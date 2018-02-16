@@ -18,7 +18,7 @@ namespace Amazon\Payment\Gateway\Response;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 
-class TxnIdHandler implements HandlerInterface
+class TransactionIdHandler implements HandlerInterface
 {
     const TXN_ID = 'TXN_ID';
 

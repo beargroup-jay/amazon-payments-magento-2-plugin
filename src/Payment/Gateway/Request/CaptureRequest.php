@@ -18,11 +18,9 @@ namespace Amazon\Payment\Gateway\Request;
 use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Core\Helper\Data;
-use Magento\Quote\Api\CartRepositoryInterface;
-use \Magento\Checkout\Model\Session;
+use Magento\Checkout\Model\Session;
 use Amazon\Payment\Api\Data\QuoteLinkInterfaceFactory;
 
 class CaptureRequest implements BuilderInterface
@@ -42,27 +40,34 @@ class CaptureRequest implements BuilderInterface
      */
     private $_productMetaData;
 
-    private $_quoteRepository;
-
+    /**
+     * @var Session
+     */
     private $_checkoutSession;
 
+    /**
+     * @var QuoteLinkInterfaceFactory
+     */
     private $_quoteLinkFactory;
 
     /**
-     * @param ConfigInterface $config
+     * CaptureRequest constructor.
+     * @param ConfigProvider $config
+     * @param Data $coreHelper
+     * @param ProductMetadata $productMetadata
+     * @param Session $checkoutSession
+     * @param QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
      */
     public function __construct(
         ConfigProvider $config,
         Data $coreHelper,
         ProductMetaData $productMetadata,
-        CartRepositoryInterface $quoteRepository,
         Session $checkoutSession,
         QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
     ) {
         $this->_config = $config;
         $this->_coreHelper = $coreHelper;
         $this->_productMetaData = $productMetadata;
-        $this->_quoteRepository = $quoteRepository;
         $this->_checkoutSession = $checkoutSession;
         $this->_quoteLinkFactory = $quoteLinkInterfaceFactory;
     }
@@ -75,6 +80,8 @@ class CaptureRequest implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
+        $data = [];
+
         if (!isset($buildSubject['payment'])
             || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
@@ -89,43 +96,30 @@ class CaptureRequest implements BuilderInterface
         $quote = $this->_checkoutSession->getQuote();
         $amazonId = $this->getAmazonId($quote->getId());
 
-        $payment = $paymentDO->getPayment();
+        if ($order && $amazonId) {
 
-
-
-        if (!$payment instanceof OrderPaymentInterface) {
-            throw new \LogicException('Order payment should be provided.');
+            $data = [
+                'amazon_order_reference_id' => $amazonId,
+                'amount' => $order->getGrandTotalAmount(),
+                'currency_code' => $order->getCurrencyCode(),
+                'seller_order_id' => $order->getOrderIncrementId(),
+                'store_name' => $quote->getStore()->getName(),
+                'custom_information' =>
+                    'Magento Version : ' . $this->_productMetaData->getVersion() . ' ' .
+                    'Plugin Version : ' . $this->_coreHelper->getVersion()
+                ,
+                'platform_id' => $this->_config->getPlatformId()
+            ];
         }
 
-      // $storeName = $this->_coreHelper->getStoreName('store', $order->getStoreId());
-
-
-        $data = [
-            'amazon_order_reference_id' => $amazonId,
-            'amount'                    => $order->getGrandTotalAmount(),
-            'currency_code'             => $order->getCurrencyCode(),
-            'seller_order_id'           => $order->getOrderIncrementId(),
-            'store_name'                => $quote->getStore()->getName(),
-            'custom_information'        =>
-                'Magento Version : ' . $this->_productMetaData->getVersion() . ' ' .
-                'Plugin Version : ' . $this->_coreHelper->getVersion()
-            ,
-            'platform_id'               => $this->_config->getPlatformId()
-        ];
-
         return $data;
-        /*
-        return [
-            'TXN_TYPE' => 'S',
-            'TXN_ID' => $payment->getLastTransId(),
-            'MERCHANT_KEY' => $this->config->getValue(
-                'merchant_gateway_key',
-                $order->getStoreId()
-            )
-        ];
-        */
     }
 
+    /**
+     * Get unique Amazon ID for order from custom table
+     * @param $quoteId
+     * @return mixed
+     */
     private function getAmazonId($quoteId)
     {
         $quoteLink = $this->_quoteLinkFactory->create();

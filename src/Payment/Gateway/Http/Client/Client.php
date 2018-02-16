@@ -13,136 +13,58 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 namespace Amazon\Payment\Gateway\Http\Client;
 
-use Magento\Payment\Gateway\Http\ClientInterface;
-use Magento\Payment\Gateway\Http\TransferInterface;
-use Magento\Payment\Model\Method\Logger;
+use Psr\Log\LoggerInterface;
 use Amazon\Core\Client\ClientFactoryInterface;
+use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
+use Magento\Checkout\Model\Session;
 
-class Client implements ClientInterface
+/**
+ * Class Client
+ * @package Amazon\Payment\Gateway\Http\Client
+ */
+class Client extends AbstractClient
 {
-    const SUCCESS = 1;
-    const FAILURE = 0;
 
     /**
-     * @var array
+     * @var AmazonSetOrderDetailsResponseFactory
      */
-    private $results = [
-        self::SUCCESS,
-        self::FAILURE
-    ];
+    private $_amazonSetOrderDetailsResponseFactory;
 
     /**
-     * @var Logger
-     */
-    private $logger;
-
-    private $_clientFactory;
-
-    /**
-     * @param Logger $logger
+     * Client constructor.
+     * @param LoggerInterface $logger
+     * @param ClientFactoryInterface $clientFactory
+     * @param Session $checkoutSession
+     * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
      */
     public function __construct(
-        Logger $logger,
-        ClientFactoryInterface $clientFactory
-    ) {
-        $this->logger = $logger;
-        $this->_clientFactory = $clientFactory;
+        LoggerInterface $logger,
+        ClientFactoryInterface $clientFactory,
+        Session $checkoutSession,
+        AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
+    )
+    {
+        parent::__construct($logger, $clientFactory, $checkoutSession);
+        $this->_amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
     }
 
     /**
-     * Places request to gateway. Returns result as ENV array
-     *
-     * @param TransferInterface $transferObject
-     * @return array
+     * @inheritdoc
      */
-    public function placeRequest(TransferInterface $transferObject)
+    protected function process(array $data)
     {
+        $storeId = $this->_getStoreId();
 
-        $data = $transferObject->getBody();
-        $log = [
-            'request' => $data,
-            'client' => static::class
-        ];
-
-
-        $response = $this->generateResponseForCode(
-            $this->getResultCode(
-                $transferObject
-            )
-        );
-
-        $this->logger->debug(
-            [
-                'request' => $transferObject->getBody(),
-                'response' => $response
-            ]
-        );
+        $responseParser = $this->_clientFactory->create($storeId)->setOrderReferenceDetails($data);
+        $response = $this->_amazonSetOrderDetailsResponseFactory->create([
+            'response' => $responseParser
+        ]);
 
         return $response;
     }
 
-    /**
-     * Generates response
-     *
-     * @return array
-     */
-    protected function generateResponseForCode($resultCode)
-    {
 
-        return array_merge(
-            [
-                'RESULT_CODE' => $resultCode,
-                'TXN_ID' => $this->generateTxnId()
-            ],
-            $this->getFieldsBasedOnResponseType($resultCode)
-        );
-    }
-
-    /**
-     * @return string
-     */
-    protected function generateTxnId()
-    {
-        return md5(mt_rand(0, 1000));
-    }
-
-    /**
-     * Returns result code
-     *
-     * @param TransferInterface $transfer
-     * @return int
-     */
-    private function getResultCode(TransferInterface $transfer)
-    {
-        $headers = $transfer->getHeaders();
-
-        if (isset($headers['force_result'])) {
-            return (int)$headers['force_result'];
-        }
-
-        return $this->results[mt_rand(0, 1)];
-    }
-
-    /**
-     * Returns response fields for result code
-     *
-     * @param int $resultCode
-     * @return array
-     */
-    private function getFieldsBasedOnResponseType($resultCode)
-    {
-        switch ($resultCode) {
-            case self::FAILURE:
-                return [
-                    'FRAUD_MSG_LIST' => [
-                        'Stolen card',
-                        'Customer location differs'
-                    ]
-                ];
-        }
-
-        return [];
-    }
 }
