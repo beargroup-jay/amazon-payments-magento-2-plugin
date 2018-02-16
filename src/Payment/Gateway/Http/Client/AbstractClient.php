@@ -17,7 +17,7 @@
 namespace Amazon\Payment\Gateway\Http\Client;
 
 use Magento\Payment\Gateway\Http\ClientInterface;
-use Psr\Log\LoggerInterface;
+use Magento\Payment\Model\Method\Logger;
 use Magento\Checkout\Model\Session;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
@@ -31,7 +31,7 @@ abstract class AbstractClient implements ClientInterface
 {
 
     /**
-     * @var LoggerInterface
+     * @var Logger
      */
     protected $_logger;
 
@@ -55,7 +55,7 @@ abstract class AbstractClient implements ClientInterface
      * @param Session $checkoutSession
      */
     public function __construct(
-        LoggerInterface $logger,
+        Logger $logger,
         ClientFactoryInterface $clientFactory,
         Session $checkoutSession
     ) {
@@ -83,7 +83,8 @@ abstract class AbstractClient implements ClientInterface
             $response = $this->process($data);
         } catch (\Exception $e) {
             $message = __($e->getMessage() ?: "Something went wrong during Gateway request.");
-            $this->_logger->critical($message);
+            $log['error'] = $message;
+            $this->_logger->debug($log);
             throw new AmazonServiceUnavailableException();
         } finally {
             $log['response'] = (array) $response;

@@ -13,15 +13,16 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 namespace Amazon\Payment\Gateway\Validator;
 
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterface;
 use Amazon\Payment\Gateway\Http\Client\Client;
+use Amazon\Payment\Domain\AmazonConstraint;
 
 class ResponseCodeValidator extends AbstractValidator
 {
-    const RESULT_CODE = 'RESULT_CODE';
 
     /**
      * Performs validation of result code
@@ -31,32 +32,28 @@ class ResponseCodeValidator extends AbstractValidator
      */
     public function validate(array $validationSubject)
     {
-        if (!isset($validationSubject['response']) || !is_array($validationSubject['response'])) {
-            throw new \InvalidArgumentException('Response does not exist');
-        }
+        $allowedConstraints = [
+            AmazonConstraint::PAYMENT_PLAN_NOT_SET_ID,
+            AmazonConstraint::PAYMENT_METHOD_NOT_ALLOWED_ID
+        ];
 
         $response = $validationSubject['response'];
 
-        if ($this->isSuccessfulTransaction($response)) {
-            return $this->createResult(
-                true,
-                []
-            );
-        } else {
-            return $this->createResult(
-                false,
-                [__('Gateway rejected the transaction.')]
-            );
+        foreach ($response['constraints'] as $constraint) {
+            if (!in_array($constraint->getId(), $allowedConstraints)) {
+                return $this->createResult(
+                    false,
+                    [__('Gateway rejected the transaction.')]
+                );
+
+            }
         }
+
+
+        return $this->createResult(
+            true,
+            ['status' => $response['status']]
+        );
     }
 
-    /**
-     * @param array $response
-     * @return bool
-     */
-    private function isSuccessfulTransaction(array $response)
-    {
-        return isset($response[self::RESULT_CODE])
-        && $response[self::RESULT_CODE] !== Client::FAILURE;
-    }
 }

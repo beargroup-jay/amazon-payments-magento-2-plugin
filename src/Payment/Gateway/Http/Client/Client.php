@@ -16,7 +16,7 @@
 
 namespace Amazon\Payment\Gateway\Http\Client;
 
-use Psr\Log\LoggerInterface;
+use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
 use Magento\Checkout\Model\Session;
@@ -35,13 +35,13 @@ class Client extends AbstractClient
 
     /**
      * Client constructor.
-     * @param LoggerInterface $logger
+     * @param Logger $logger
      * @param ClientFactoryInterface $clientFactory
      * @param Session $checkoutSession
      * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
      */
     public function __construct(
-        LoggerInterface $logger,
+        Logger $logger,
         ClientFactoryInterface $clientFactory,
         Session $checkoutSession,
         AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
@@ -59,11 +59,17 @@ class Client extends AbstractClient
         $storeId = $this->_getStoreId();
 
         $responseParser = $this->_clientFactory->create($storeId)->setOrderReferenceDetails($data);
-        $response = $this->_amazonSetOrderDetailsResponseFactory->create([
+        $amazonResponse = $this->_amazonSetOrderDetailsResponseFactory->create([
             'response' => $responseParser
         ]);
 
-        return $response;
+        // Gateway expects response to be in form of array
+        return [
+          'status' => $responseParser->response['Status'],
+            'constraints' => $amazonResponse->getConstraints(),
+            'responseBody' => $responseParser->response['ResponseBody']
+        ];
+
     }
 
 

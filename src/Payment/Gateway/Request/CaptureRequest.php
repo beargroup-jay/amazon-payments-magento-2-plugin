@@ -94,7 +94,7 @@ class CaptureRequest implements BuilderInterface
         $order = $paymentDO->getOrder();
 
         $quote = $this->_checkoutSession->getQuote();
-        $amazonId = $this->getAmazonId($quote->getId());
+        $amazonId = $this->_getAmazonId($quote->getId());
 
         if ($order && $amazonId) {
 
@@ -120,7 +120,7 @@ class CaptureRequest implements BuilderInterface
      * @param $quoteId
      * @return mixed
      */
-    private function getAmazonId($quoteId)
+    private function _getAmazonId($quoteId)
     {
         $quoteLink = $this->_quoteLinkFactory->create();
         $quoteLink->load($quoteId, 'quote_id');

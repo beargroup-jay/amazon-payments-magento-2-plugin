@@ -20,7 +20,7 @@
     </virtualType>
 
     <!-- Logger, initialized with AmazonConfig -->
-    <virtualType name="AmazonLogger" type="Psr\Log\LoggerInterface">
+    <virtualType name="AmazonLogger" type="Magento\Payment\Model\Method\Logger">
         <arguments>
             <argument name="config" xsi:type="object">AmazonConfig</argument>
         </arguments>
