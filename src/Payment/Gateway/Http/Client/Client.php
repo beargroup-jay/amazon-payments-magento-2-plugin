@@ -19,7 +19,9 @@ namespace Amazon\Payment\Gateway\Http\Client;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
-use Magento\Checkout\Model\Session;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Core\Helper\CategoryExclusion;
+use Amazon\Core\Exception\AmazonWebapiException;
 
 /**
  * Class Client
@@ -34,21 +36,29 @@ class Client extends AbstractClient
     private $_amazonSetOrderDetailsResponseFactory;
 
     /**
+     * @var CategoryExclusion
+     */
+    private $_categoryExclusion;
+
+    /**
      * Client constructor.
      * @param Logger $logger
      * @param ClientFactoryInterface $clientFactory
-     * @param Session $checkoutSession
+     * @param ApiHelper $apiHelper
      * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
+     * @param CategoryExclusion $categoryExclusion
      */
     public function __construct(
         Logger $logger,
         ClientFactoryInterface $clientFactory,
-        Session $checkoutSession,
-        AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
+        ApiHelper $apiHelper,
+        AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
+        CategoryExclusion $categoryExclusion
     )
     {
-        parent::__construct($logger, $clientFactory, $checkoutSession);
+        parent::__construct($logger, $clientFactory, $apiHelper);
         $this->_amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
+        $this->_categoryExclusion = $categoryExclusion;
     }
 
     /**
@@ -56,7 +66,9 @@ class Client extends AbstractClient
      */
     protected function process(array $data)
     {
-        $storeId = $this->_getStoreId();
+        $this->_checkForExcludedProducts();
+
+        $storeId = $this->_apiHelper->getStoreId();
 
         $responseParser = $this->_clientFactory->create($storeId)->setOrderReferenceDetails($data);
         $amazonResponse = $this->_amazonSetOrderDetailsResponseFactory->create([
@@ -65,12 +77,26 @@ class Client extends AbstractClient
 
         // Gateway expects response to be in form of array
         return [
-          'status' => $responseParser->response['Status'],
+            'status' => $responseParser->response['Status'],
             'constraints' => $amazonResponse->getConstraints(),
             'responseBody' => $responseParser->response['ResponseBody']
         ];
 
     }
 
-
+    /**
+     * @throws AmazonWebapiException
+     */
+    private function _checkForExcludedProducts()
+    {
+        if ($this->_categoryExclusion->isQuoteDirty()) {
+            throw new AmazonWebapiException(
+                __(
+                    'Unfortunately it is not possible to pay with Amazon Pay for this order. Please choose another payment method.'
+                ),
+                AmazonAuthorizationStatus::CODE_HARD_DECLINE,
+                AmazonWebapiException::HTTP_FORBIDDEN
+            );
+        }
+    }
 }

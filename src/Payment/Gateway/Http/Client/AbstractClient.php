@@ -18,10 +18,10 @@ namespace Amazon\Payment\Gateway\Http\Client;
 
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Model\Method\Logger;
-use Magento\Checkout\Model\Session;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Amazon\Core\Client\ClientFactoryInterface;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
 
 /**
  * Class AbstractClient
@@ -29,6 +29,11 @@ use Amazon\Core\Client\ClientFactoryInterface;
  */
 abstract class AbstractClient implements ClientInterface
 {
+
+    /**
+     * @var ApiHelper
+     */
+    protected $_apiHelper;
 
     /**
      * @var Logger
@@ -42,26 +47,19 @@ abstract class AbstractClient implements ClientInterface
 
 
     /**
-     * @var Session
-     */
-    protected $_checkoutSession;
-
-
-    /**
      * AbstractClient constructor.
-     *
      * @param Logger $logger
      * @param ClientFactoryInterface $clientFactory
-     * @param Session $checkoutSession
+     * @param ApiHelper $apiHelper
      */
     public function __construct(
         Logger $logger,
         ClientFactoryInterface $clientFactory,
-        Session $checkoutSession
+        ApiHelper $apiHelper
     ) {
         $this->_logger = $logger;
         $this->_clientFactory = $clientFactory;
-        $this->_checkoutSession = $checkoutSession;
+        $this->_apiHelper = $apiHelper;
     }
 
     /**
@@ -94,16 +92,6 @@ abstract class AbstractClient implements ClientInterface
         return $response;
     }
 
-
-    /**
-     * Gets quote from current checkout session and returns store ID
-     * @return int
-     */
-    protected function _getStoreId()
-    {
-        $quote = $this->_checkoutSession->getQuote();
-        return $quote->getStoreId();
-    }
 
     /**
      * Process http request

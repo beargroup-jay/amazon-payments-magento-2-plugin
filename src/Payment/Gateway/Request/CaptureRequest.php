@@ -20,8 +20,8 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Core\Helper\Data;
-use Magento\Checkout\Model\Session;
-use Amazon\Payment\Api\Data\QuoteLinkInterfaceFactory;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Magento\Framework\Exception\LocalizedException;
 
 class CaptureRequest implements BuilderInterface
 {
@@ -41,42 +41,34 @@ class CaptureRequest implements BuilderInterface
     private $_productMetaData;
 
     /**
-     * @var Session
+     * @var ApiHelper
      */
-    private $_checkoutSession;
-
-    /**
-     * @var QuoteLinkInterfaceFactory
-     */
-    private $_quoteLinkFactory;
+    private $_apiHelper;
 
     /**
      * CaptureRequest constructor.
      * @param ConfigProvider $config
      * @param Data $coreHelper
      * @param ProductMetadata $productMetadata
-     * @param Session $checkoutSession
-     * @param QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
+     * @param ApiHelper $apiHelper
      */
     public function __construct(
         ConfigProvider $config,
         Data $coreHelper,
         ProductMetaData $productMetadata,
-        Session $checkoutSession,
-        QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
+        ApiHelper $apiHelper
     ) {
         $this->_config = $config;
         $this->_coreHelper = $coreHelper;
         $this->_productMetaData = $productMetadata;
-        $this->_checkoutSession = $checkoutSession;
-        $this->_quoteLinkFactory = $quoteLinkInterfaceFactory;
+        $this->_apiHelper = $apiHelper;
     }
 
+
     /**
-     * Builds ENV request
-     *
      * @param array $buildSubject
      * @return array
+     * @throws LocalizedException
      */
     public function build(array $buildSubject)
     {
@@ -88,13 +80,16 @@ class CaptureRequest implements BuilderInterface
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
 
-        /** @var PaymentDataObjectInterface $paymentDO */
         $paymentDO = $buildSubject['payment'];
 
         $order = $paymentDO->getOrder();
 
-        $quote = $this->_checkoutSession->getQuote();
-        $amazonId = $this->_getAmazonId($quote->getId());
+        $this->_validateCurrency($order->getCurrencyCode());
+
+        $this->_setReservedOrderId();
+
+        $quote = $this->_apiHelper->getQuote();
+        $amazonId = $this->_apiHelper->getAmazonId();
 
         if ($order && $amazonId) {
 
@@ -106,8 +101,7 @@ class CaptureRequest implements BuilderInterface
                 'store_name' => $quote->getStore()->getName(),
                 'custom_information' =>
                     'Magento Version : ' . $this->_productMetaData->getVersion() . ' ' .
-                    'Plugin Version : ' . $this->_coreHelper->getVersion()
-                ,
+                    'Plugin Version : ' . $this->_coreHelper->getVersion(),
                 'platform_id' => $this->_config->getPlatformId()
             ];
         }
@@ -116,15 +110,30 @@ class CaptureRequest implements BuilderInterface
     }
 
     /**
-     * Get unique Amazon ID for order from custom table
-     * @param $quoteId
-     * @return mixed
+     * @throws \Exception
      */
-    private function _getAmazonId($quoteId)
+    private function _setReservedOrderId()
     {
-        $quoteLink = $this->_quoteLinkFactory->create();
-        $quoteLink->load($quoteId, 'quote_id');
+        $quote = $this->_apiHelper->getQuote();
 
-        return $quoteLink->getAmazonOrderReferenceId();
+        if (!$quote->getReservedOrderId()) {
+            $quote
+                ->reserveOrderId()
+                ->save();
+        }
+
     }
+
+    /**
+     * @param $code
+     * @throws LocalizedException
+     */
+    private function _validateCurrency($code)
+    {
+        if ($this->_coreHelper->getCurrencyCode() !== $code) {
+            throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
+        }
+    }
+
 }
+

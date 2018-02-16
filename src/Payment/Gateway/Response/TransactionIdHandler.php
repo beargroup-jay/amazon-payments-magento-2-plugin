@@ -17,42 +17,53 @@ namespace Amazon\Payment\Gateway\Response;
 
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
-use Magento\Checkout\Model\Session;
-use Amazon\Payment\Api\Data\QuoteLinkInterfaceFactory;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\Method\Logger;
 use AmazonPay\ResponseInterface;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
 
 class TransactionIdHandler implements HandlerInterface
 {
-    private $_quoteLinkFactory;
 
-    private $_checkoutSession;
-
+    /**
+     * @var ClientFactoryInterface
+     */
     private $_clientFactory;
 
+    /**
+     * @var Logger
+     */
     private $_logger;
 
+    /**
+     * @var ApiHelper
+     */
+    private $_apiHelper;
+
+    /**
+     * TransactionIdHandler constructor.
+     * @param ClientFactoryInterface $clientFactory
+     * @param Logger $logger
+     * @param ApiHelper $apiHelper
+     */
     public function __construct(
-        QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory,
-        Session $session,
         ClientFactoryInterface $clientFactory,
-        Logger $logger
+        Logger $logger,
+        ApiHelper $apiHelper
+
     ) {
-        $this->_quoteLinkFactory = $quoteLinkInterfaceFactory;
-        $this->_checkoutSession = $session;
         $this->_clientFactory = $clientFactory;
         $this->_logger = $logger;
+        $this->_apiHelper = $apiHelper;
     }
 
     /**
-     * Handles transaction id
-     *
      * @param array $handlingSubject
      * @param array $response
-     * @return void
+     * @throws AmazonServiceUnavailableException
+     * @throws \Exception
      */
     public function handle(array $handlingSubject, array $response)
     {
@@ -62,61 +73,26 @@ class TransactionIdHandler implements HandlerInterface
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
 
-        /** @var PaymentDataObjectInterface $paymentDO */
-        $paymentDO = $handlingSubject['payment'];
-
-        $payment = $paymentDO->getPayment();
-
-        $quote = $this->_checkoutSession->getQuote();
-        $amazonId = $this->_getAmazonId($quote->getId());
-        $storeId = $this->_getStoreId();
+        $amazonId = $this->_apiHelper->getAmazonId();
+        $storeId = $this->_apiHelper->getStoreId();
 
         $valid = $this->_confirmOrderReference($amazonId, $storeId);
-        $quoteLink = $this->_getQuoteLink($quote->getId());
 
-        $quoteLink->setConfirmed(true)->save();
-/*
-        $payment->setTransactionId($response[self::TXN_ID]);
-        $payment->setIsTransactionClosed(false);
-*/
+        if ($valid) {
+            $quoteLink = $this->_apiHelper->getQuoteLink();
+
+            $quoteLink->setConfirmed(true)->save();
+        }
+
     }
 
-    /**
-     * Gets quote from current checkout session and returns store ID
-     * @return int
-     */
-    private function _getStoreId()
-    {
-        $quote = $this->_checkoutSession->getQuote();
-        return $quote->getStoreId();
-    }
-
-    private function _getQuoteLink($quoteId)
-    {
-        $quoteLink = $this->_quoteLinkFactory->create();
-        $quoteLink->load($quoteId, 'quote_id');
-
-        return $quoteLink;
-    }
-
-    /**
-     * Get unique Amazon ID for order from custom table
-     * @param $quoteId
-     * @return mixed
-     */
-    private function _getAmazonId($quoteId)
-    {
-        $quoteLink = $this->_quoteLinkFactory->create();
-        $quoteLink->load($quoteId, 'quote_id');
-
-        return $quoteLink->getAmazonOrderReferenceId();
-    }
 
     /**
      * @param $amazonOrderReferenceId
      * @param null $storeId
+     * @return array
      * @throws AmazonServiceUnavailableException
-     * @throws \Exception
+     * @throws LocalizedException
      */
     private function _confirmOrderReference($amazonOrderReferenceId, $storeId = null)
     {
@@ -140,6 +116,10 @@ class TransactionIdHandler implements HandlerInterface
         return $response;
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @throws AmazonServiceUnavailableException
+     */
     private function _validateResponse(ResponseInterface $response)
     {
         $data = $response->toArray();
