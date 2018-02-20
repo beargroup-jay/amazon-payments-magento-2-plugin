@@ -71,6 +71,7 @@ class ConfirmOrder implements ObserverInterface
 
     public function execute(Observer $observer)
     {
+/*
         $order                  = $observer->getOrder();
         $quoteId                = $order->getQuoteId();
         $storeId                = $order->getStoreId();
@@ -85,6 +86,7 @@ class ConfirmOrder implements ObserverInterface
                 $this->confirmOrderReference($quoteLink, $amazonOrderReferenceId, $storeId);
             }
         }
+*/
     }
 
     protected function checkForExcludedProducts()

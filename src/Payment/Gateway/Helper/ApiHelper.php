@@ -97,4 +97,16 @@ class ApiHelper
         return $quoteLink;
     }
 
+    /**
+     * Adds status message - should be called after transaction and order are saved
+     * and ID exists.
+     *
+     * @param $message
+     */
+    public function setOrderMessage($message) {
+        $order = $this->_checkoutSession->getLastRealOrder();
+        if ($order) {
+            $order->addStatusHistoryComment($message);
+        }
+    }
 }

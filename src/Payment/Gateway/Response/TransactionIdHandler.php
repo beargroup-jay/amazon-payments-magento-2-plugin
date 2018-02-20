@@ -13,6 +13,7 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 namespace Amazon\Payment\Gateway\Response;
 
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
@@ -53,7 +54,8 @@ class TransactionIdHandler implements HandlerInterface
         Logger $logger,
         ApiHelper $apiHelper
 
-    ) {
+    )
+    {
         $this->_clientFactory = $clientFactory;
         $this->_logger = $logger;
         $this->_apiHelper = $apiHelper;
@@ -72,16 +74,27 @@ class TransactionIdHandler implements HandlerInterface
         ) {
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
+        $paymentDO = $handlingSubject['payment'];
 
         $amazonId = $this->_apiHelper->getAmazonId();
         $storeId = $this->_apiHelper->getStoreId();
 
+        $payment = $paymentDO->getPayment();
+        $order = $paymentDO->getOrder();
+
+        $message = __('Captured amount of %1 online', $order->getGrandTotalAmount());
+        $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
+
         $valid = $this->_confirmOrderReference($amazonId, $storeId);
 
         if ($valid) {
+            $payment->setTransactionId($amazonId);
+
             $quoteLink = $this->_apiHelper->getQuoteLink();
 
             $quoteLink->setConfirmed(true)->save();
+            // hand messaging off since OrderAdapter class doesn't have access to setting order messages
+            $this->_apiHelper->setOrderMessage($message);
         }
 
     }
