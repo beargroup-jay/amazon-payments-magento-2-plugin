@@ -18,6 +18,8 @@ namespace Amazon\Payment\Gateway\Helper;
 
 use Magento\Checkout\Model\Session;
 use Amazon\Payment\Api\Data\QuoteLinkInterfaceFactory;
+use Amazon\Core\Helper\Data;
+
 
 /**
  * Class ApiHelper
@@ -32,12 +34,17 @@ class ApiHelper
     /**
      * @var QuoteLinkInterfaceFactory
      */
-    private $_quoteLinkFactory;
+    private $quoteLinkFactory;
 
     /**
      * @var Session
      */
-    private $_checkoutSession;
+    private $checkoutSession;
+
+    /**
+     * @var Data
+     */
+    private $coreHelper;
 
     /**
      * ApiHelper constructor.
@@ -47,11 +54,13 @@ class ApiHelper
      */
     public function __construct(
         Session $checkoutSession,
-        QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
+        QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory,
+        Data $coreHelper
     )
     {
-        $this->_quoteLinkFactory = $quoteLinkInterfaceFactory;
-        $this->_checkoutSession = $checkoutSession;
+        $this->quoteLinkFactory = $quoteLinkInterfaceFactory;
+        $this->checkoutSession = $checkoutSession;
+        $this->coreHelper = $coreHelper;
     }
 
     /**
@@ -81,7 +90,7 @@ class ApiHelper
      */
     public function getQuote()
     {
-        return $this->_checkoutSession->getQuote();
+        return $this->checkoutSession->getQuote();
     }
 
     /**
@@ -91,7 +100,7 @@ class ApiHelper
     {
         $quote = $this->getQuote();
 
-        $quoteLink = $this->_quoteLinkFactory->create();
+        $quoteLink = $this->quoteLinkFactory->create();
         $quoteLink->load($quote->getId(), 'quote_id');
 
         return $quoteLink;
@@ -104,9 +113,10 @@ class ApiHelper
      * @param $message
      */
     public function setOrderMessage($message) {
-        $order = $this->_checkoutSession->getLastRealOrder();
+        $order = $this->checkoutSession->getLastRealOrder();
         if ($order) {
             $order->addStatusHistoryComment($message);
         }
     }
+
 }

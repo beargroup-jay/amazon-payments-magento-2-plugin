@@ -58,7 +58,7 @@
         <arguments>
             <argument name="builders" xsi:type="array">
                 <item name="transaction" xsi:type="string">Amazon\Payment\Gateway\Request\AuthorizationRequest</item>
-                <item name="mockData" xsi:type="string">Amazon\Payment\Gateway\Request\MockDataRequest</item>
+                <item name="authorizeData" xsi:type="string">Amazon\Payment\Gateway\Request\AuthorizeDataRequest</item>
             </argument>
         </arguments>
     </virtualType>

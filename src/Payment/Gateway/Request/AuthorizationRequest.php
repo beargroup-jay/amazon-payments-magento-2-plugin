@@ -15,9 +15,13 @@
  */
 namespace Amazon\Payment\Gateway\Request;
 
+use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
+use Magento\Framework\App\ProductMetadata;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Core\Helper\Data;
 
 class AuthorizationRequest implements BuilderInterface
 {
@@ -27,14 +31,47 @@ class AuthorizationRequest implements BuilderInterface
     private $config;
 
     /**
+     * @var ProductMetadata
+     */
+    private $productMetaData;
+
+    /**
+     * @var ApiHelper
+     */
+    private $apiHelper;
+
+    /**
+     * @var ConfigProvider
+     */
+    private $configProvider;
+
+    /**
+     * @var Data
+     */
+    private $coreHelper;
+
+    /**
+     * AuthorizationRequest constructor.
      * @param ConfigInterface $config
+     * @param ConfigProvider $configProvider
+     * @param ProductMetadata $productMetadata
+     * @param ApiHelper $apiHelper
+     * @param Data $coreHelper
      */
     public function __construct(
-        ConfigInterface $config
-    ) {
+        ConfigInterface $config,
+        ConfigProvider $configProvider,
+        ProductMetaData $productMetadata,
+        ApiHelper $apiHelper,
+        Data $coreHelper
+    )
+    {
+        $this->configProvider = $configProvider;
         $this->config = $config;
+        $this->coreHelper = $coreHelper;
+        $this->productMetaData = $productMetadata;
+        $this->apiHelper = $apiHelper;
     }
-
     /**
      * Builds ENV request
      *
@@ -43,27 +80,50 @@ class AuthorizationRequest implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
+        $data = [];
+
         if (!isset($buildSubject['payment'])
             || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
 
-        /** @var PaymentDataObjectInterface $payment */
-        $payment = $buildSubject['payment'];
-        $order = $payment->getOrder();
-        $address = $order->getShippingAddress();
+        $paymentDO = $buildSubject['payment'];
 
-        return [
-            'TXN_TYPE' => 'A',
-            'INVOICE' => $order->getOrderIncrementId(),
-            'AMOUNT' => $order->getGrandTotalAmount(),
-            'CURRENCY' => $order->getCurrencyCode(),
-            'EMAIL' => $address->getEmail(),
-            'MERCHANT_KEY' => $this->config->getValue(
-                'merchant_gateway_key',
-                $order->getStoreId()
-            )
-        ];
+        $order = $paymentDO->getOrder();
+
+        if ($this->coreHelper->getCurrencyCode() !== $order->getCurrencyCode()) {
+            throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
+        }
+
+        $quote = $this->apiHelper->getQuote();
+
+        if (!$quote->getReservedOrderId()) {
+            try {
+                $quote->reserveOrderId()->save();
+            }
+            catch(\Exception $e) {
+                $this->logger->debug($e->getMessage());
+            }
+        }
+
+        $amazonId = $this->apiHelper->getAmazonId();
+
+        if ($order && $amazonId) {
+
+            $data = [
+                'amazon_order_reference_id' => $amazonId,
+                'amount' => $order->getGrandTotalAmount(),
+                'currency_code' => $order->getCurrencyCode(),
+                'seller_order_id' => $order->getOrderIncrementId(),
+                'store_name' => $quote->getStore()->getName(),
+                'custom_information' =>
+                    'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
+                    'Plugin Version : ' . $this->coreHelper->getVersion(),
+                'platform_id' => $this->configProvider->getPlatformId()
+            ];
+        }
+
+        return $data;
     }
 }

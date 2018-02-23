@@ -19,49 +19,59 @@ use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
-use Amazon\Core\Helper\Data;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Core\Helper\Data;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Payment\Model\Method\Logger;
 
 class CaptureRequest implements BuilderInterface
 {
     /**
      * @var ConfigInterface|ConfigProvider
      */
-    private $_config;
+    private $config;
 
     /**
-     * @var Data
+     * @var Logger
      */
-    private $_coreHelper;
+    private $logger;
 
     /**
      * @var ProductMetadata
      */
-    private $_productMetaData;
+    private $productMetaData;
 
     /**
      * @var ApiHelper
      */
-    private $_apiHelper;
+    private $apiHelper;
+
+    /**
+     * @var Data
+     */
+    private $coreHelper;
 
     /**
      * CaptureRequest constructor.
+     *
      * @param ConfigProvider $config
-     * @param Data $coreHelper
      * @param ProductMetadata $productMetadata
      * @param ApiHelper $apiHelper
+     * @param Data $coreHelper
+     * @param Logger $logger
      */
     public function __construct(
         ConfigProvider $config,
-        Data $coreHelper,
         ProductMetaData $productMetadata,
-        ApiHelper $apiHelper
+        ApiHelper $apiHelper,
+        Data $coreHelper,
+        Logger $logger
     ) {
-        $this->_config = $config;
-        $this->_coreHelper = $coreHelper;
-        $this->_productMetaData = $productMetadata;
-        $this->_apiHelper = $apiHelper;
+        $this->config = $config;
+        $this->coreHelper = $coreHelper;
+        $this->productMetaData = $productMetadata;
+        $this->apiHelper = $apiHelper;
+        $this->logger = $logger;
     }
 
 
@@ -84,12 +94,22 @@ class CaptureRequest implements BuilderInterface
 
         $order = $paymentDO->getOrder();
 
-        $this->_validateCurrency($order->getCurrencyCode());
+        if ($this->coreHelper->getCurrencyCode() !== $order->getCurrencyCode()) {
+            throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
+        }
 
-        $this->_setReservedOrderId();
+        $quote = $this->apiHelper->getQuote();
 
-        $quote = $this->_apiHelper->getQuote();
-        $amazonId = $this->_apiHelper->getAmazonId();
+        if (!$quote->getReservedOrderId()) {
+            try {
+                $quote->reserveOrderId()->save();
+            }
+            catch(\Exception $e) {
+                $this->logger->debug($e->getMessage());
+            }
+        }
+
+        $amazonId = $this->apiHelper->getAmazonId();
 
         if ($order && $amazonId) {
 
@@ -100,40 +120,17 @@ class CaptureRequest implements BuilderInterface
                 'seller_order_id' => $order->getOrderIncrementId(),
                 'store_name' => $quote->getStore()->getName(),
                 'custom_information' =>
-                    'Magento Version : ' . $this->_productMetaData->getVersion() . ' ' .
-                    'Plugin Version : ' . $this->_coreHelper->getVersion(),
-                'platform_id' => $this->_config->getPlatformId()
+                    'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
+                    'Plugin Version : ' . $this->coreHelper->getVersion(),
+                'platform_id' => $this->config->getPlatformId()
             ];
         }
 
         return $data;
     }
 
-    /**
-     * @throws \Exception
-     */
-    private function _setReservedOrderId()
-    {
-        $quote = $this->_apiHelper->getQuote();
 
-        if (!$quote->getReservedOrderId()) {
-            $quote
-                ->reserveOrderId()
-                ->save();
-        }
 
-    }
-
-    /**
-     * @param $code
-     * @throws LocalizedException
-     */
-    private function _validateCurrency($code)
-    {
-        if ($this->_coreHelper->getCurrencyCode() !== $code) {
-            throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
-        }
-    }
 
 }
 

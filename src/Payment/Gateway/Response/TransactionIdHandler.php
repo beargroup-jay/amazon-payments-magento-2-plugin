@@ -31,17 +31,17 @@ class TransactionIdHandler implements HandlerInterface
     /**
      * @var ClientFactoryInterface
      */
-    private $_clientFactory;
+    private $clientFactory;
 
     /**
      * @var Logger
      */
-    private $_logger;
+    private $logger;
 
     /**
      * @var ApiHelper
      */
-    private $_apiHelper;
+    private $apiHelper;
 
     /**
      * TransactionIdHandler constructor.
@@ -56,9 +56,9 @@ class TransactionIdHandler implements HandlerInterface
 
     )
     {
-        $this->_clientFactory = $clientFactory;
-        $this->_logger = $logger;
-        $this->_apiHelper = $apiHelper;
+        $this->clientFactory = $clientFactory;
+        $this->logger = $logger;
+        $this->apiHelper = $apiHelper;
     }
 
     /**
@@ -76,8 +76,8 @@ class TransactionIdHandler implements HandlerInterface
         }
         $paymentDO = $handlingSubject['payment'];
 
-        $amazonId = $this->_apiHelper->getAmazonId();
-        $storeId = $this->_apiHelper->getStoreId();
+        $amazonId = $this->apiHelper->getAmazonId();
+        $storeId = $this->apiHelper->getStoreId();
 
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
@@ -85,16 +85,16 @@ class TransactionIdHandler implements HandlerInterface
         $message = __('Captured amount of %1 online', $order->getGrandTotalAmount());
         $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
 
-        $valid = $this->_confirmOrderReference($amazonId, $storeId);
+        $valid = $this->confirmOrderReference($amazonId, $storeId);
 
         if ($valid) {
             $payment->setTransactionId($amazonId);
 
-            $quoteLink = $this->_apiHelper->getQuoteLink();
+            $quoteLink = $this->apiHelper->getQuoteLink();
 
             $quoteLink->setConfirmed(true)->save();
             // hand messaging off since OrderAdapter class doesn't have access to setting order messages
-            $this->_apiHelper->setOrderMessage($message);
+            $this->apiHelper->setOrderMessage($message);
         }
 
     }
@@ -107,11 +107,11 @@ class TransactionIdHandler implements HandlerInterface
      * @throws AmazonServiceUnavailableException
      * @throws LocalizedException
      */
-    private function _confirmOrderReference($amazonOrderReferenceId, $storeId = null)
+    private function confirmOrderReference($amazonOrderReferenceId, $storeId = null)
     {
         $response = [];
         try {
-            $response = $this->_clientFactory->create($storeId)->confirmOrderReference(
+            $response = $this->clientFactory->create($storeId)->confirmOrderReference(
                 [
                     'amazon_order_reference_id' => $amazonOrderReferenceId
                 ]
@@ -122,7 +122,7 @@ class TransactionIdHandler implements HandlerInterface
             throw $e;
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
-            $this->_logger->debug($log);
+            $this->logger->debug($log);
             throw new AmazonServiceUnavailableException();
         }
 

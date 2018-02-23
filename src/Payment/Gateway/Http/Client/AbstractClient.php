@@ -33,17 +33,17 @@ abstract class AbstractClient implements ClientInterface
     /**
      * @var ApiHelper
      */
-    protected $_apiHelper;
+    protected $apiHelper;
 
     /**
      * @var Logger
      */
-    protected $_logger;
+    protected $logger;
 
     /**
      * @var ClientFactoryInterface
      */
-    protected $_clientFactory;
+    protected $clientFactory;
 
 
     /**
@@ -57,9 +57,9 @@ abstract class AbstractClient implements ClientInterface
         ClientFactoryInterface $clientFactory,
         ApiHelper $apiHelper
     ) {
-        $this->_logger = $logger;
-        $this->_clientFactory = $clientFactory;
-        $this->_apiHelper = $apiHelper;
+        $this->logger = $logger;
+        $this->clientFactory = $clientFactory;
+        $this->apiHelper = $apiHelper;
     }
 
     /**
@@ -82,11 +82,11 @@ abstract class AbstractClient implements ClientInterface
         } catch (\Exception $e) {
             $message = __($e->getMessage() ?: "Something went wrong during Gateway request.");
             $log['error'] = $message;
-            $this->_logger->debug($log);
+            $this->logger->debug($log);
             throw new AmazonServiceUnavailableException();
         } finally {
             $log['response'] = (array) $response;
-            $this->_logger->debug($log);
+            $this->logger->debug($log);
         }
 
         return $response;

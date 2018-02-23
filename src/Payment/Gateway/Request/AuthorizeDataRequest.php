@@ -18,10 +18,19 @@ namespace Amazon\Payment\Gateway\Request;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Amazon\Payment\Gateway\Http\Client\Client;
+use Magento\Payment\Helper\Formatter;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
 
-class MockDataRequest implements BuilderInterface
+class AuthorizeDataRequest implements BuilderInterface
 {
-    const FORCE_RESULT = 'FORCE_RESULT';
+    use Formatter;
+
+    private $apiHelper;
+
+    public function __construct(ApiHelper $apiHelper)
+    {
+        $this->apiHelper = $apiHelper;
+    }
 
     /**
      * Builds ENV request
@@ -31,6 +40,7 @@ class MockDataRequest implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
+        // TODO replace with Method/Amazon _authorize call
         if (!isset($buildSubject['payment'])
             || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
@@ -41,11 +51,13 @@ class MockDataRequest implements BuilderInterface
         $paymentDO = $buildSubject['payment'];
         $payment = $paymentDO->getPayment();
 
-        $transactionResult = $payment->getAdditionalInformation('transaction_result');
-        return [
-            self::FORCE_RESULT => $transactionResult === null
-                ? Client::SUCCESS
-                : $transactionResult
+        $order = $paymentDO->getOrder();
+
+        $data = [
+            'transaction_id' => $this->apiHelper->getAmazonId(),
+            'amount' => $this->formatPrice($order->getGrandTotalAmount())
         ];
+
+        return $data;
     }
 }

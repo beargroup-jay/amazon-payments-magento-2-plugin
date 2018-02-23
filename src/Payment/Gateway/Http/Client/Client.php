@@ -33,12 +33,12 @@ class Client extends AbstractClient
     /**
      * @var AmazonSetOrderDetailsResponseFactory
      */
-    private $_amazonSetOrderDetailsResponseFactory;
+    private $amazonSetOrderDetailsResponseFactory;
 
     /**
      * @var CategoryExclusion
      */
-    private $_categoryExclusion;
+    private $categoryExclusion;
 
     /**
      * Client constructor.
@@ -57,8 +57,8 @@ class Client extends AbstractClient
     )
     {
         parent::__construct($logger, $clientFactory, $apiHelper);
-        $this->_amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
-        $this->_categoryExclusion = $categoryExclusion;
+        $this->amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
+        $this->categoryExclusion = $categoryExclusion;
     }
 
     /**
@@ -66,12 +66,12 @@ class Client extends AbstractClient
      */
     protected function process(array $data)
     {
-        $this->_checkForExcludedProducts();
+        $this->checkForExcludedProducts();
 
-        $storeId = $this->_apiHelper->getStoreId();
+        $storeId = $this->apiHelper->getStoreId();
 
-        $responseParser = $this->_clientFactory->create($storeId)->setOrderReferenceDetails($data);
-        $amazonResponse = $this->_amazonSetOrderDetailsResponseFactory->create([
+        $responseParser = $this->clientFactory->create($storeId)->setOrderReferenceDetails($data);
+        $amazonResponse = $this->amazonSetOrderDetailsResponseFactory->create([
             'response' => $responseParser
         ]);
 
@@ -87,9 +87,9 @@ class Client extends AbstractClient
     /**
      * @throws AmazonWebapiException
      */
-    private function _checkForExcludedProducts()
+    private function checkForExcludedProducts()
     {
-        if ($this->_categoryExclusion->isQuoteDirty()) {
+        if ($this->categoryExclusion->isQuoteDirty()) {
             throw new AmazonWebapiException(
                 __(
                     'Unfortunately it is not possible to pay with Amazon Pay for this order. Please choose another payment method.'
