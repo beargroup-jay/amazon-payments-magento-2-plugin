@@ -368,6 +368,7 @@ class Amazon extends AbstractMethod
         $capture = false,
         $async = false
     ) {
+        /*
         $data = [
             'amazon_order_reference_id'  => $amazonOrderReferenceId,
             'authorization_amount'       => $amount,
@@ -400,6 +401,7 @@ class Amazon extends AbstractMethod
         $this->amazonAuthorizationValidator->validate($authorizationDetails);
 
         $this->setAuthorizeTransaction($payment, $authorizationDetails, $capture);
+        */
     }
 
     protected function setAuthorizeTransaction(
@@ -407,6 +409,7 @@ class Amazon extends AbstractMethod
         AmazonAuthorizationDetails $details,
         $capture
     ) {
+        /*
         $pending       = (AmazonAuthorizationStatus::STATE_PENDING == $details->getStatus()->getState());
         $transactionId = $details->getAuthorizeTransactionId();
 
@@ -429,7 +432,9 @@ class Amazon extends AbstractMethod
         }
 
         $payment->setTransactionId($transactionId);
+        */
     }
+
 
     protected function processHardDecline(InfoInterface $payment, $amazonOrderReferenceId)
     {
@@ -471,6 +476,7 @@ class Amazon extends AbstractMethod
 
     protected function _capture(InfoInterface $payment, $amount)
     {
+        /*
         $amazonOrderReferenceId = $this->getAmazonOrderReferenceId($payment);
         $authorizationId        = $payment->getParentTransactionId();
         $storeId                = $payment->getOrder()->getStoreId();
@@ -515,6 +521,7 @@ class Amazon extends AbstractMethod
                 }
             }
         }
+        */
     }
 
     protected function validatePreCapture(
@@ -524,6 +531,7 @@ class Amazon extends AbstractMethod
         $authorizationId,
         $storeId
     ) {
+        /*
         try {
             $data = [
                 'amazon_authorization_id' => $authorizationId,
@@ -541,7 +549,7 @@ class Amazon extends AbstractMethod
         } catch (AuthorizationExpiredException $e) {
             $this->reauthorizeAndCapture($payment, $amount, $amazonOrderReferenceId, $authorizationId, $storeId);
         }
-
+*/
         return false;
     }
 

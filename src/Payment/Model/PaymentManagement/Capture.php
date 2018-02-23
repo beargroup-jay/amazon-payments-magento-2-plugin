@@ -210,6 +210,7 @@ class Capture extends AbstractOperation implements CaptureInterface
         OrderPaymentInterface $payment,
         OrderInterface $order
     ) {
+        /*
         $transactionId   = $pendingCapture->getCaptureId();
         $transaction     = $this->paymentManagement->getTransaction($transactionId, $payment, $order);
         $invoice         = $this->getInvoice($transactionId, $order);
@@ -224,6 +225,7 @@ class Capture extends AbstractOperation implements CaptureInterface
 
         $this->paymentManagement->closeTransaction($transactionId, $payment, $order);
         $pendingCapture->delete();
+        */
     }
 
     protected function declinePendingCapture(

@@ -16,17 +16,18 @@
 
 namespace Amazon\Payment\Gateway\Response;
 
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
-use Amazon\Core\Client\ClientFactoryInterface;
-use Amazon\Core\Exception\AmazonServiceUnavailableException;
-use Amazon\Core\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Core\Helper\Data;
 
-class TransactionIdHandler implements HandlerInterface
+class CompleteAuthHandler implements HandlerInterface
 {
 
+    /**
+     * @var Data
+     */
+    private $coreHelper;
 
     /**
      * @var Logger
@@ -38,11 +39,8 @@ class TransactionIdHandler implements HandlerInterface
      */
     private $apiHelper;
 
-    private $coreHelper;
-
-
     /**
-     * TransactionIdHandler constructor.
+     * CompleteAuthHandler constructor.
      * @param Logger $logger
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
@@ -61,26 +59,22 @@ class TransactionIdHandler implements HandlerInterface
     /**
      * @param array $handlingSubject
      * @param array $response
-     * @throws AmazonServiceUnavailableException
-     * @throws \Exception
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (!isset($handlingSubject['payment'])
-            || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
-        }
-        $paymentDO = $handlingSubject['payment'];
 
         $amazonId = $this->apiHelper->getAmazonId();
 
-        $payment = $paymentDO->getPayment();
+        $order = $this->apiHelper->getOrder();
 
-        $payment->setTransactionId($amazonId);
 
-        $quoteLink = $this->apiHelper->getQuoteLink();
-        $quoteLink->setConfirmed(true)->save();
+        $message = __('Authorized amount of %1 online', $order->getGrandTotal());
+        $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
+
+
+        $order->setStatus($this->coreHelper->getNewOrderStatus());
+        $order->addStatusHistoryComment($message);
+
     }
 
 }

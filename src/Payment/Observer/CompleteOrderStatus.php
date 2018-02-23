@@ -39,7 +39,7 @@ class CompleteOrderStatus implements ObserverInterface
     {
         /**
          * @var OrderInterface $order
-         */
+
         $order          = $observer->getOrder();
         $payment        = $order->getPayment();
         $newOrderStatus = $this->coreHelper->getNewOrderStatus();
@@ -51,5 +51,6 @@ class CompleteOrderStatus implements ObserverInterface
         ) {
             $order->setStatus($newOrderStatus);
         }
+         */
     }
 }

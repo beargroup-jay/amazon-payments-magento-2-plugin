@@ -43,6 +43,7 @@ class CopyOrderReference implements ObserverInterface
 
     public function execute(Observer $observer)
     {
+        /*
         $order = $observer->getOrder();
 
         if ($order instanceof Order) {
@@ -62,5 +63,6 @@ class CopyOrderReference implements ObserverInterface
                     ->save();
             }
         }
+        */
     }
 }

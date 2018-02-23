@@ -249,6 +249,7 @@ class Authorization extends AbstractOperation implements AuthorizationInterface
         $this->setProcessing($order);
 
         if ($capture) {
+            /*
             $invoice = $this->getInvoiceAndSetPaid($transactionId, $order);
 
             if (! $newTransaction) {
@@ -263,16 +264,20 @@ class Authorization extends AbstractOperation implements AuthorizationInterface
                 'base_amount_paid_online',
                 $payment->formatAmount($invoice->getBaseGrandTotal())
             );
+            */
         } else {
+            /*
             $formattedAmount = $order->getBaseCurrency()->formatTxt($payment->getBaseAmountAuthorized());
             $message         = __('Authorized amount of %1 online', $formattedAmount);
+            */
         }
-
+/*
         $transaction = ($newTransaction) ?: $this->paymentManagement->getTransaction($transactionId, $payment, $order);
         $payment->addTransactionCommentsToOrder($transaction, $message);
 
         $pendingAuthorization->delete();
         $order->save();
+*/
     }
 
     protected function softDeclinePendingAuthorization(

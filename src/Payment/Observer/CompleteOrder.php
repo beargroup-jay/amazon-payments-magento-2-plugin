@@ -47,7 +47,7 @@ class CompleteOrder implements ObserverInterface
     {
         /**
          * @var OrderInterface $order
-         */
+
         $order    = $observer->getOrder();
 
         if ($order->getPayment() && $order->getPayment()->getMethod() != Amazon::PAYMENT_METHOD_CODE) {
@@ -63,6 +63,7 @@ class CompleteOrder implements ObserverInterface
         ) {
             $this->closeOrderReference($order);
         }
+         */
     }
 
     /**

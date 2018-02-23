@@ -16,17 +16,20 @@
 
 namespace Amazon\Payment\Gateway\Response;
 
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
-use Amazon\Core\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
+use AmazonPay\ResponseInterface;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
 
-class TransactionIdHandler implements HandlerInterface
+class VerifyOrderHandler implements HandlerInterface
 {
 
+    /**
+     * @var ClientFactoryInterface
+     */
+    private $clientFactory;
 
     /**
      * @var Logger
@@ -38,49 +41,73 @@ class TransactionIdHandler implements HandlerInterface
      */
     private $apiHelper;
 
-    private $coreHelper;
-
-
     /**
      * TransactionIdHandler constructor.
+     * @param ClientFactoryInterface $clientFactory
      * @param Logger $logger
      * @param ApiHelper $apiHelper
-     * @param Data $coreHelper
      */
     public function __construct(
+        ClientFactoryInterface $clientFactory,
         Logger $logger,
-        ApiHelper $apiHelper,
-        Data $coreHelper
+        ApiHelper $apiHelper
+
     )
     {
+        $this->clientFactory = $clientFactory;
         $this->logger = $logger;
         $this->apiHelper = $apiHelper;
-        $this->coreHelper = $coreHelper;
     }
 
     /**
      * @param array $handlingSubject
      * @param array $response
+     * @return array|void
      * @throws AmazonServiceUnavailableException
-     * @throws \Exception
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (!isset($handlingSubject['payment'])
-            || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
-        }
-        $paymentDO = $handlingSubject['payment'];
-
+        $response = [];
         $amazonId = $this->apiHelper->getAmazonId();
+        $storeId = $this->apiHelper->getStoreId();
 
-        $payment = $paymentDO->getPayment();
+        try {
+            $result = $this->clientFactory->create($storeId)->confirmOrderReference(
+                [
+                    'amazon_order_reference_id' => $amazonId
+                ]
+            );
 
-        $payment->setTransactionId($amazonId);
+        $response = $result->response;
 
-        $quoteLink = $this->apiHelper->getQuoteLink();
-        $quoteLink->setConfirmed(true)->save();
+        if (!isset($response['Status']) || (isset($response['Status']) && $response['Status'] != '200')) {
+            throw new AmazonServiceUnavailableException();
+        }
+
+        } catch (\Exception $e) {
+            $log['error'] = $e->getMessage();
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
+        }
+
+        return $response;
+
     }
+
+
+
+    /**
+     * @param ResponseInterface $response
+     * @throws AmazonServiceUnavailableException
+     */
+    private function _validateResponse(ResponseInterface $response)
+    {
+        $data = $response->toArray();
+
+        if (200 != $data['ResponseStatus']) {
+            throw new AmazonServiceUnavailableException();
+        }
+    }
+
 
 }

@@ -113,10 +113,17 @@ class ApiHelper
      * @param $message
      */
     public function setOrderMessage($message) {
-        $order = $this->checkoutSession->getLastRealOrder();
+        $order = $this->getOrder();
         if ($order) {
             $order->addStatusHistoryComment($message);
         }
+    }
+
+    /**
+     * @return \Magento\Sales\Model\Order
+     */
+    public function getOrder() {
+        return $this->checkoutSession->getLastRealOrder();
     }
 
 }
