@@ -96,13 +96,17 @@ class ApiHelper
     /**
      * @return \Amazon\Payment\Model\QuoteLink
      */
-    public function getQuoteLink()
+    public function getQuoteLink($quote_id = '')
     {
-        $quote = $this->getQuote();
-
         $quoteLink = $this->quoteLinkFactory->create();
-        $quoteLink->load($quote->getId(), 'quote_id');
 
+        if (!$quote_id) {
+            $quote = $this->getQuote();
+            $quoteLink->load($quote->getId(), 'quote_id');
+        }
+        else {
+            $quoteLink->load($quote_id, 'quote_id');
+        }
         return $quoteLink;
     }
 

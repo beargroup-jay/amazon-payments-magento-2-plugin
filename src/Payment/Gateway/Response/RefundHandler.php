@@ -16,17 +16,17 @@
 
 namespace Amazon\Payment\Gateway\Response;
 
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
-use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Amazon\Core\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Magento\Framework\Notification\NotifierInterface;
 
-class TransactionIdHandler implements HandlerInterface
+class RefundHandler implements HandlerInterface
 {
 
+    private $notifierPool;
 
     /**
      * @var Logger
@@ -53,12 +53,14 @@ class TransactionIdHandler implements HandlerInterface
     public function __construct(
         Logger $logger,
         ApiHelper $apiHelper,
-        Data $coreHelper
+        Data $coreHelper,
+        NotifierInterface $notifierPool
     )
     {
         $this->logger = $logger;
         $this->apiHelper = $apiHelper;
         $this->coreHelper = $coreHelper;
+        $this->notifierPool = $notifierPool;
     }
 
     /**
@@ -69,22 +71,16 @@ class TransactionIdHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (!isset($handlingSubject['payment'])
-            || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
+
+        if (isset($response['status']) && $response['status'] != 200) {
+            $this->notifierPool->addMajor(
+                'Unable to Refund via AmazonPay',
+                'The refund amount or the Amazon Order ID is incorrect.'
+            );
         }
-        $paymentDO = $handlingSubject['payment'];
-
-        $amazonId = $this->apiHelper->getAmazonId();
-
-        $payment = $paymentDO->getPayment();
-
-        $payment->setTransactionId($amazonId);
-        $payment->setParentTransactionId($payment->getTransactionId());
-
-        $quoteLink = $this->apiHelper->getQuoteLink();
-        $quoteLink->setConfirmed(true)->save();
+        else {
+            $this->notifierPool->addNotice('AmazonPay', 'Successfully sent refund for '.$handlingSubject['amount'].' amount to AmazonPay');
+        }
     }
 
 }
