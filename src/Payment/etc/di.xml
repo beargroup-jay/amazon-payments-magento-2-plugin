@@ -37,12 +37,33 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="authorize" xsi:type="string">AmazonAuthorizeCommand</item>
-                <item name="capture" xsi:type="string">AmazonCaptureCommand</item>
+                <item name="capture" xsi:type="string">AmazonCaptureStrategyCommand</item>
+                <item name="sale" xsi:type="string">AmazonSaleCommand</item>
+                <item name="settlement" xsi:type="string">AmazonSettlementCommand</item>
                 <item name="void" xsi:type="string">AmazonVoidCommand</item>
+                <item name="cancel" xsi:type="string">AmazonVoidCommand</item>
                 <item name="refund" xsi:type="string">AmazonRefundCommand</item>
             </argument>
         </arguments>
     </virtualType>
+    <virtualType name="AmazonCaptureStrategyCommand" type="Amazon\Payment\Gateway\Command\CaptureStrategyCommand">
+        <arguments>
+            <argument name="commandPool" xsi:type="object">AmazonCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="AmazonCommandManager" type="Magento\Payment\Gateway\Command\CommandManager">
+        <arguments>
+            <argument name="commandPool" xsi:type="object">AmazonCommandPool</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Payment\Gateway\Command\CommandManagerPool">
+        <arguments>
+            <argument name="executors" xsi:type="array">
+                <item name="amazon_payment" xsi:type="string">AmazonCommandManager</item>
+            </argument>
+        </arguments>
+    </type>
 
     <!-- Authorize command -->
     <virtualType name="AmazonAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
@@ -70,13 +91,24 @@
     </type>
 
     <!-- Capture command -->
-    <virtualType name="AmazonCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+    <virtualType name="AmazonSaleCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\CaptureRequest</argument>
             <argument name="handler" xsi:type="object">AmazonCaptureResponseHandlerComposite</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\ResponseCodeValidator</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\Client</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture command -->
+    <virtualType name="AmazonSettlementCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\SettlementRequest</argument>
+            <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\SettlementHandler</argument>
+            <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
+            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\SettlementClient</argument>
         </arguments>
     </virtualType>
 
@@ -104,10 +136,10 @@
     <virtualType name="AmazonVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\VoidRequest</argument>
-            <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\TransactionIdHandler</argument>
+            <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\VoidHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\ResponseCodeValidator</argument>
-            <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\Client</argument>
+            <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\VoidClient</argument>
         </arguments>
     </virtualType>
 
@@ -165,28 +197,28 @@
     <preference for="Amazon\Payment\Api\OrderInformationManagementInterface" type="Amazon\Payment\Model\OrderInformationManagement" />
     <preference for="Amazon\Payment\Api\AddressManagementInterface" type="Amazon\Payment\Model\AddressManagement" />
     <preference for="Amazon\Payment\Api\PaymentManagementInterface" type="Amazon\Payment\Model\PaymentManagement" />
-    <preference for="Amazon\Payment\Api\PaymentManagement\CaptureInterface" type="Amazon\Payment\Model\PaymentManagement\Capture" />
-    <preference for="Amazon\Payment\Api\PaymentManagement\AuthorizationInterface" type="Amazon\Payment\Model\PaymentManagement\Authorization" />
+    <!--preference for="Amazon\Payment\Api\PaymentManagement\CaptureInterface" type="Amazon\Payment\Model\PaymentManagement\Capture" />
+    <preference for="Amazon\Payment\Api\PaymentManagement\AuthorizationInterface" type="Amazon\Payment\Model\PaymentManagement\Authorization" /-->
     <preference for="Amazon\Payment\Api\Data\QuoteLinkInterface" type="Amazon\Payment\Model\QuoteLink" />
     <preference for="Amazon\Payment\Api\Data\OrderLinkInterface" type="Amazon\Payment\Model\OrderLink" />
-    <preference for="Amazon\Payment\Api\Data\PendingCaptureInterface" type="Amazon\Payment\Model\PendingCapture" />
+    <!--preference for="Amazon\Payment\Api\Data\PendingCaptureInterface" type="Amazon\Payment\Model\PendingCapture" />
     <preference for="Amazon\Payment\Api\Data\PendingAuthorizationInterface" type="Amazon\Payment\Model\PendingAuthorization" />
-    <preference for="Amazon\Payment\Api\Data\PendingRefundInterface" type="Amazon\Payment\Model\PendingRefund" />
+    <preference for="Amazon\Payment\Api\Data\PendingRefundInterface" type="Amazon\Payment\Model\PendingRefund" /-->
     <preference for="Amazon\Payment\Ipn\IpnHandlerFactoryInterface" type="Amazon\Payment\Ipn\IpnHandlerFactory" />
     <preference for="AmazonPay\IpnHandlerInterface" type="Amazon\Payment\Ipn\IpnHandler" />
     <preference for="Amazon\Payment\Api\Ipn\CompositeProcessorInterface" type="Amazon\Payment\Model\Ipn\CompositeProcessor" />
     <type name="Magento\Quote\Api\CartRepositoryInterface">
         <plugin name="amazon_payment_quote_repository" type="Amazon\Payment\Plugin\QuoteRepository" sortOrder="1" />
     </type>
-    <type name="Magento\Checkout\Api\ShippingInformationManagementInterface">
+    <!--type name="Magento\Checkout\Api\ShippingInformationManagementInterface">
         <plugin name="amazon_payment_shipping_information_management" type="Amazon\Payment\Plugin\ShippingInformationManagement" sortOrder="1" />
-    </type>
+    </type-->
     <type name="Magento\Quote\Api\Data\PaymentInterface">
         <plugin name="amazon_payment_additional_information" type="Amazon\Payment\Plugin\AdditionalInformation" />
     </type>
-    <type name="Magento\Sales\Controller\Adminhtml\Order\Invoice\Save">
+    <!--type name="Magento\Sales\Controller\Adminhtml\Order\Invoice\Save">
         <plugin name="amazon_payment_invoice_save" type="Amazon\Payment\Plugin\InvoiceSave" sortOrder="1" />
-    </type>
+    </type-->
     <type name="Amazon\Payment\Cron\ProcessAmazonRefunds">
         <arguments>
             <argument name="paymentManagement" xsi:type="object">Amazon\Payment\Api\PaymentManagementInterface\Proxy</argument>
@@ -202,9 +234,9 @@
             <argument name="adminNotifier" xsi:type="object">Magento\Framework\Notification\NotifierInterface\Proxy</argument>
         </arguments>
     </type>
-    <type name="Magento\Sales\Api\TransactionRepositoryInterface">
+    <!--type name="Magento\Sales\Api\TransactionRepositoryInterface">
         <plugin name="amazon_payment_transaction_repository" type="Amazon\Payment\Plugin\TransactionRepository" sortOrder="1" />
-    </type>
+    </type-->
     <type name="Amazon\Payment\Api\Ipn\CompositeProcessorInterface">
         <arguments>
             <argument name="processors" xsi:type="array">

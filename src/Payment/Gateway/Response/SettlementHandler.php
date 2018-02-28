@@ -22,7 +22,7 @@ use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
 use Magento\Framework\Message\ManagerInterface;
 
-class RefundHandler implements HandlerInterface
+class SettlementHandler implements HandlerInterface
 {
 
     /**
@@ -74,11 +74,12 @@ class RefundHandler implements HandlerInterface
     {
         if (isset($response['status']) && $response['status'] != 200) {
             $this->messageManager->addErrorMessage(
-                'The refund amount or the Amazon Order ID is incorrect.'
+                'Amazon Order ID is incorrect.'
             );
         }
         else {
-            $this->messageManager->addSuccessMessage('Successfully sent refund for '.$handlingSubject['amount'].' amount to AmazonPay');
+            // TODO: finish creating invoice/authorize payment
+            //$this->messageManager->addSuccessMessage('Successfully sent refund for '.$handlingSubject['amount'].' amount to AmazonPay');
         }
     }
 

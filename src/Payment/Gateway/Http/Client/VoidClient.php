@@ -16,19 +16,20 @@
 
 namespace Amazon\Payment\Gateway\Http\Client;
 
+use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
-use Amazon\Core\Exception\AmazonServiceUnavailableException;
 
 /**
- * Class RefundClient
+ * Class VoidClient
  * @package Amazon\Payment\Gateway\Http\Client
  */
-class RefundClient extends AbstractClient
+class VoidClient extends AbstractClient
 {
+
     /**
-     * Client constructor.
+     * VoidClient constructor.
      * @param Logger $logger
      * @param ClientFactoryInterface $clientFactory
      * @param ApiHelper $apiHelper
@@ -52,19 +53,19 @@ class RefundClient extends AbstractClient
 
         try {
             $client = $this->clientFactory->create($store_id);
-            $responseParser = $client->refund($data);
+            $responseParser = $client->cancelOrderReference($data);
+
+            // Gateway expects response to be in form of array
+            return [
+                'status' => $responseParser->response['Status'],
+                'constraints' => [],
+                'responseBody' => $responseParser->response['ResponseBody']
+            ];
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
             $this->logger->debug($log);
             throw new AmazonServiceUnavailableException();
         }
-
-        // Gateway expects response to be in form of array
-        return [
-            'status' => $responseParser->response['Status'],
-            'constraints' => [],
-            'responseBody' => $responseParser->response['ResponseBody']
-        ];
     }
 
 }

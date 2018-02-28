@@ -13,27 +13,66 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 namespace Amazon\Payment\Gateway\Request;
 
-use Magento\Payment\Gateway\ConfigInterface;
+use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Framework\App\ProductMetadata;
+use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Core\Helper\Data;
+use Magento\Sales\Api\OrderRepositoryInterface;
 
 class VoidRequest implements BuilderInterface
 {
-    /**
-     * @var ConfigInterface
-     */
-    private $config;
 
     /**
-     * @param ConfigInterface $config
+     * @var ProductMetadata
+     */
+    private $productMetaData;
+
+    /**
+     * @var ApiHelper
+     */
+    private $apiHelper;
+
+    /**
+     * @var ConfigProvider
+     */
+    private $configProvider;
+
+    /**
+     * @var Data
+     */
+    private $coreHelper;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $orderRepository;
+
+    /**
+     * VoidRequest constructor.
+     * @param ConfigProvider $configProvider
+     * @param ProductMetadata $productMetadata
+     * @param ApiHelper $apiHelper
+     * @param Data $coreHelper
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        ConfigInterface $config
-    ) {
-        $this->config = $config;
+        ConfigProvider $configProvider,
+        ProductMetaData $productMetadata,
+        ApiHelper $apiHelper,
+        Data $coreHelper,
+        OrderRepositoryInterface $orderRepository
+
+    )
+    {
+        $this->configProvider = $configProvider;
+        $this->coreHelper = $coreHelper;
+        $this->productMetaData = $productMetadata;
+        $this->apiHelper = $apiHelper;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
@@ -44,29 +83,29 @@ class VoidRequest implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
+        $data = [];
+
+
         if (!isset($buildSubject['payment'])
-            || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
 
-        /** @var PaymentDataObjectInterface $paymentDO */
         $paymentDO = $buildSubject['payment'];
+        $orderDO = $paymentDO->getOrder();
 
-        $order = $paymentDO->getOrder();
-        $payment = $paymentDO->getPayment();
+        $order = $this->orderRepository->get($orderDO->getId());
 
-        if (!$payment instanceof OrderPaymentInterface) {
-            throw new \LogicException('Order payment should be provided.');
+        if ($order) {
+            $quoteLink = $this->apiHelper->getQuoteLink($order->getQuoteId());
+
+            if ($quoteLink) {
+                $data = [
+                    'amazon_order_reference_id' => $quoteLink->getAmazonOrderReferenceId()
+                ];
+            }
         }
 
-        return [
-            'TXN_TYPE' => 'V',
-            'TXN_ID' => $payment->getLastTransId(),
-            'MERCHANT_KEY' => $this->config->getValue(
-                'merchant_gateway_key',
-                $order->getStoreId()
-            )
-        ];
+        return $data;
     }
 }
