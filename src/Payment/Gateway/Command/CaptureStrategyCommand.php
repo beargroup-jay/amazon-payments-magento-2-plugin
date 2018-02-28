@@ -11,6 +11,12 @@ namespace Amazon\Payment\Gateway\Command;
 use Magento\Payment\Gateway\CommandInterface;
 use Magento\Payment\Gateway\Command\CommandPoolInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Payment\Gateway\Helper\ContextHelper;
+use Magento\Sales\Api\TransactionRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Sales\Api\Data\TransactionInterface;
+use Amazon\Core\Helper\Data;
 
 class CaptureStrategyCommand implements CommandInterface
 {
@@ -19,12 +25,43 @@ class CaptureStrategyCommand implements CommandInterface
 
     const CAPTURE = 'settlement';
 
+    /**
+     * @var CommandPoolInterface
+     */
     private $commandPool;
 
+    /**
+     * @var TransactionRepositoryInterface
+     */
+    private $transactionRepository;
+
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    private $searchCriteriaBuilder;
+
+    /**
+     * @var FilterBuilder
+     */
+    private $filterBuilder;
+
+    /**
+     * @var Data
+     */
+    private $coreHelper;
+
     public function __construct(
-        CommandPoolInterface $commandPool
+        CommandPoolInterface $commandPool,
+        TransactionRepositoryInterface $transactionRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        FilterBuilder $filterBuilder,
+        Data $coreHelper
     ) {
         $this->commandPool = $commandPool;
+        $this->transactionRepository = $transactionRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->filterBuilder = $filterBuilder;
+        $this->coreHelper = $coreHelper;
     }
 
     /**
@@ -32,19 +69,16 @@ class CaptureStrategyCommand implements CommandInterface
      */
     public function execute(array $commandSubject)
     {
-        if ($commandSubject) {
+        if (isset($commandSubject['payment'])) {
+            $paymentDO = $commandSubject['payment'];
+            $paymentInfo = $paymentDO->getPayment();
+            ContextHelper::assertOrderPayment($paymentInfo);
 
+            $command = $this->getCommand($paymentInfo);
+            if ($command) {
+                $this->commandPool->get($command)->execute($commandSubject);
+            }
         }
-        /*
-        /** @var \Magento\Payment\Gateway\Data\PaymentDataObjectInterface $paymentDO */
-//        $paymentDO = $this->subjectReader->readPayment($commandSubject);
-
-        /** @var \Magento\Sales\Api\Data\OrderPaymentInterface $paymentInfo */
-    //    $paymentInfo = $paymentDO->getPayment();
-  //      ContextHelper::assertOrderPayment($paymentInfo);
-
-      //  $command = $this->getCommand($paymentInfo);
-        //$this->commandPool->get($command)->execute($commandSubject);
     }
 
     /**
@@ -54,24 +88,48 @@ class CaptureStrategyCommand implements CommandInterface
      */
     private function getCommand(OrderPaymentInterface $payment)
     {
-        // if auth transaction is not exists execute authorize&capture command
-        $existsCapture = $this->isExistsCaptureTransaction($payment);
+        $isCaptured = $this->captureTransactionExists($payment);
 
-        // do capture for authorization transaction
-        if (!$existsCapture && !$this->isExpiredAuthorization($payment)) {
+        if (!$payment->getAuthorizationTransaction() && !$isCaptured) {
+            return self::SALE;
+        }
+
+        if (!$isCaptured && $this->isAuthorized($payment)) {
             return self::CAPTURE;
         }
 
+        // failed to determine action from prior tests, so use module settings
+        if ($this->coreHelper->getPaymentAction() == 'authorize_capture') {
+            self::SALE;
+        }
+
+        return self::CAPTURE;
     }
 
     /**
+     * Check if auth transaction exists
+     *
      * @param OrderPaymentInterface $payment
      * @return boolean
      */
-    private function isExpiredAuthorization(OrderPaymentInterface $payment) {
-        return false;
-    }
+    private function isAuthorized(OrderPaymentInterface $payment) {
+        $filters = [];
+        $this->filterBuilder->setField('transaction_id')
+            ->setValue($payment->getLastTransId())
+            ->create();
 
+        $this->filterBuilder->setField('txn_type')
+            ->setValue(TransactionInterface::TYPE_AUTH)
+            ->create();
+
+        $searchCriteria = $this->searchCriteriaBuilder->addFilters($filters)
+            ->create();
+
+        $count = $this->transactionRepository->getList($searchCriteria)->getTotalCount();
+
+        return (boolean) $count;
+
+    }
 
     /**
      * Check if capture transaction already exists
@@ -79,32 +137,22 @@ class CaptureStrategyCommand implements CommandInterface
      * @param OrderPaymentInterface $payment
      * @return bool
      */
-    private function isExistsCaptureTransaction(OrderPaymentInterface $payment)
+    private function captureTransactionExists(OrderPaymentInterface $payment)
     {
-        $count = 0;
-        /*
-        $this->searchCriteriaBuilder->addFilters(
-            [
-                $this->filterBuilder
-                    ->setField('payment_id')
-                    ->setValue($payment->getId())
-                    ->create(),
-            ]
-        );
 
-        $this->searchCriteriaBuilder->addFilters(
-            [
-                $this->filterBuilder
-                    ->setField('txn_type')
-                    ->setValue(TransactionInterface::TYPE_CAPTURE)
-                    ->create(),
-            ]
-        );
+        $filters[] = $this->filterBuilder->setField('payment_id')
+            ->setValue($payment->getId())
+            ->create();
 
-        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $filters[] = $this->filterBuilder->setField('txn_type')
+            ->setValue(TransactionInterface::TYPE_CAPTURE)
+            ->create();
+
+        $searchCriteria = $this->searchCriteriaBuilder->addFilters($filters)
+            ->create();
 
         $count = $this->transactionRepository->getList($searchCriteria)->getTotalCount();
-        */
+
         return (boolean) $count;
     }
 }
