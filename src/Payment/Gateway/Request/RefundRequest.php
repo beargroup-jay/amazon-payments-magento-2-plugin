@@ -16,8 +16,6 @@
 
 namespace Amazon\Payment\Gateway\Request;
 
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
-use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
@@ -38,26 +36,22 @@ class RefundRequest implements BuilderInterface
     private $apiHelper;
 
     /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-
-    /**
      * @var Data
      */
     private $coreHelper;
 
+    /**
+     * @var OrderRepositoryInterface
+     */
     private $orderRepository;
 
     /**
      * AuthorizationRequest constructor.
-     * @param ConfigProvider $configProvider
      * @param ProductMetadata $productMetadata
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
      */
     public function __construct(
-        ConfigProvider $configProvider,
         ProductMetaData $productMetadata,
         ApiHelper $apiHelper,
         Data $coreHelper,
@@ -65,7 +59,6 @@ class RefundRequest implements BuilderInterface
 
     )
     {
-        $this->configProvider = $configProvider;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->apiHelper = $apiHelper;

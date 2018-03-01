@@ -15,7 +15,6 @@
  */
 namespace Amazon\Payment\Gateway\Request;
 
-use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
@@ -41,11 +40,6 @@ class AuthorizationRequest implements BuilderInterface
     private $apiHelper;
 
     /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-
-    /**
      * @var Data
      */
     private $coreHelper;
@@ -53,20 +47,17 @@ class AuthorizationRequest implements BuilderInterface
     /**
      * AuthorizationRequest constructor.
      * @param ConfigInterface $config
-     * @param ConfigProvider $configProvider
      * @param ProductMetadata $productMetadata
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
      */
     public function __construct(
         ConfigInterface $config,
-        ConfigProvider $configProvider,
         ProductMetaData $productMetadata,
         ApiHelper $apiHelper,
         Data $coreHelper
     )
     {
-        $this->configProvider = $configProvider;
         $this->config = $config;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
@@ -120,7 +111,7 @@ class AuthorizationRequest implements BuilderInterface
                 'custom_information' =>
                     'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
                     'Plugin Version : ' . $this->coreHelper->getVersion(),
-                'platform_id' => $this->configProvider->getPlatformId()
+                'platform_id' => $this->config::PLATFORM_ID
             ];
         }
 

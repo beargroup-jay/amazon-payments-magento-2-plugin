@@ -16,7 +16,6 @@
 
 namespace Amazon\Payment\Gateway\Request;
 
-use Amazon\Payment\Model\Ui\ConfigProvider;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
@@ -37,11 +36,6 @@ class VoidRequest implements BuilderInterface
     private $apiHelper;
 
     /**
-     * @var ConfigProvider
-     */
-    private $configProvider;
-
-    /**
      * @var Data
      */
     private $coreHelper;
@@ -53,22 +47,18 @@ class VoidRequest implements BuilderInterface
 
     /**
      * VoidRequest constructor.
-     * @param ConfigProvider $configProvider
      * @param ProductMetadata $productMetadata
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
-        ConfigProvider $configProvider,
         ProductMetaData $productMetadata,
         ApiHelper $apiHelper,
         Data $coreHelper,
         OrderRepositoryInterface $orderRepository
-
     )
     {
-        $this->configProvider = $configProvider;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->apiHelper = $apiHelper;

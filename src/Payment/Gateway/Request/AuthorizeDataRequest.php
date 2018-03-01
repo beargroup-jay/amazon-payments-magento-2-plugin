@@ -17,7 +17,6 @@ namespace Amazon\Payment\Gateway\Request;
 
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Amazon\Payment\Gateway\Http\Client\Client;
 use Magento\Payment\Helper\Formatter;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
 
@@ -49,7 +48,6 @@ class AuthorizeDataRequest implements BuilderInterface
 
         /** @var PaymentDataObjectInterface $paymentDO */
         $paymentDO = $buildSubject['payment'];
-        $payment = $paymentDO->getPayment();
 
         $order = $paymentDO->getOrder();
 

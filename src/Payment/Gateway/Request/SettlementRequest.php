@@ -15,7 +15,7 @@
  */
 namespace Amazon\Payment\Gateway\Request;
 
-use Amazon\Payment\Model\Ui\ConfigProvider;
+use Amazon\Payment\Gateway\Config\Config;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
@@ -27,7 +27,7 @@ use Magento\Payment\Model\Method\Logger;
 class SettlementRequest implements BuilderInterface
 {
     /**
-     * @var ConfigInterface|ConfigProvider
+     * @var Config
      */
     private $config;
 
@@ -54,14 +54,14 @@ class SettlementRequest implements BuilderInterface
     /**
      * CaptureRequest constructor.
      *
-     * @param ConfigProvider $config
+     * @param Config $config
      * @param ProductMetadata $productMetadata
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
      * @param Logger $logger
      */
     public function __construct(
-        ConfigProvider $config,
+        Config $config,
         ProductMetaData $productMetadata,
         ApiHelper $apiHelper,
         Data $coreHelper,
@@ -122,7 +122,7 @@ class SettlementRequest implements BuilderInterface
                 'custom_information' =>
                     'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
                     'Plugin Version : ' . $this->coreHelper->getVersion(),
-                'platform_id' => $this->config->getPlatformId()
+                'platform_id' => $this->config::PLATFORM_ID
             ];
         }
 */

@@ -15,7 +15,7 @@
  */
 namespace Amazon\Payment\Plugin;
 
-use Amazon\Payment\Model\Method\Amazon;
+use Amazon\Payment\Gateway\Config\Config;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Sales\Api\Data\OrderInterfaceFactory;
@@ -46,7 +46,7 @@ class InvoiceSave
         $order   = $this->orderFactory->create();
         $order->load($orderId);
 
-        if ($order->getPayment() && Amazon::PAYMENT_METHOD_CODE == $order->getPayment()->getMethod()) {
+        if ($order->getPayment() && Config::CODE == $order->getPayment()->getMethod()) {
             $lastInvoice = $order->getInvoiceCollection()->getLastItem();
 
             if ($lastInvoice && Invoice::STATE_OPEN == $lastInvoice->getState()) {
