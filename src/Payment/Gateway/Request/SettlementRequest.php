@@ -17,6 +17,8 @@ namespace Amazon\Payment\Gateway\Request;
 
 use Amazon\Payment\Gateway\Config\Config;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Amazon\Core\Client\ClientFactoryInterface;
+use Amazon\Payment\Domain\AmazonCaptureDetailsResponseFactory;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
@@ -51,6 +53,10 @@ class SettlementRequest implements BuilderInterface
      */
     private $coreHelper;
 
+    private $amazonCaptureDetailsResponse;
+
+    private $clientFactory;
+
     /**
      * CaptureRequest constructor.
      *
@@ -62,12 +68,15 @@ class SettlementRequest implements BuilderInterface
      */
     public function __construct(
         Config $config,
+        AmazonCaptureDetailsResponseFactory $amazonCaptureDetailsResponse,
+        ClientFactoryInterface $clientFactory,
         ProductMetaData $productMetadata,
         ApiHelper $apiHelper,
         Data $coreHelper,
         Logger $logger
     ) {
         $this->config = $config;
+        $this->amazonCaptureDetailsResponse = $amazonCaptureDetailsResponse;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->apiHelper = $apiHelper;
@@ -85,14 +94,23 @@ class SettlementRequest implements BuilderInterface
         $data = [];
 
         if (!isset($buildSubject['payment'])
-            || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
 
         $paymentDO = $buildSubject['payment'];
 
-        $order = $paymentDO->getOrder();
+        $orderDO = $paymentDO->getOrder();
+
+        $order = $this->orderRepository->get($orderDO->getId());
+
+        $quoteLink = $this->apiHelper->getQuoteLink($order->getQuoteId());
+
+        if ($quoteLink) {
+
+
+
+        }
 /*
         if ($this->coreHelper->getCurrencyCode() !== $order->getCurrencyCode()) {
             throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));

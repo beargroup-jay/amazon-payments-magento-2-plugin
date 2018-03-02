@@ -20,6 +20,7 @@ use Magento\Payment\Gateway\Response\HandlerInterface;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
 use Amazon\Core\Helper\Data;
+use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 
 class CompleteAuthHandler implements HandlerInterface
 {
@@ -63,17 +64,35 @@ class CompleteAuthHandler implements HandlerInterface
     public function handle(array $handlingSubject, array $response)
     {
 
-        $amazonId = $this->apiHelper->getAmazonId();
+            if (!isset($handlingSubject['payment'])
+                || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
+            ) {
+                throw new \InvalidArgumentException('Payment data object should be provided');
+            }
+            $paymentDO = $handlingSubject['payment'];
 
-        $order = $this->apiHelper->getOrder();
+            $amazonId = $this->apiHelper->getAmazonId();
+
+            $payment = $paymentDO->getPayment();
+
+            $order = $this->apiHelper->getOrder();
 
 
-        $message = __('Authorized amount of %1 online', $order->getGrandTotal());
-        $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
+        // TODO check if item is async without transaction info and add to pending auth table.
+        if ($response['status']) {
+            $payment->setTransactionId($response['authorize_transaction_id']);
+            $payment->setIsTransactionClosed(false);
 
+            $quoteLink = $this->apiHelper->getQuoteLink();
+            $quoteLink->setConfirmed(true)->save();
 
-        $order->setStatus($this->coreHelper->getNewOrderStatus());
-        $order->addStatusHistoryComment($message);
+            $message = __('Authorized amount of %1 online', $order->getGrandTotal());
+            $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
+
+            $order->setStatus($this->coreHelper->getNewOrderStatus());
+            $order->addStatusHistoryComment($message);
+
+        }
 
     }
 

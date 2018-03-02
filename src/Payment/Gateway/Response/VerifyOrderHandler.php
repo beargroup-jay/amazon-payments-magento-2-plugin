@@ -94,20 +94,4 @@ class VerifyOrderHandler implements HandlerInterface
 
     }
 
-
-
-    /**
-     * @param ResponseInterface $response
-     * @throws AmazonServiceUnavailableException
-     */
-    private function _validateResponse(ResponseInterface $response)
-    {
-        $data = $response->toArray();
-
-        if (200 != $data['ResponseStatus']) {
-            throw new AmazonServiceUnavailableException();
-        }
-    }
-
-
 }

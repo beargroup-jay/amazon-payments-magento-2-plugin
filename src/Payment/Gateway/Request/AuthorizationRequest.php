@@ -104,14 +104,15 @@ class AuthorizationRequest implements BuilderInterface
 
             $data = [
                 'amazon_order_reference_id' => $amazonId,
-                'amount' => $order->getGrandTotalAmount(),
+                'amount' => $buildSubject['amount'],
                 'currency_code' => $order->getCurrencyCode(),
                 'seller_order_id' => $order->getOrderIncrementId(),
                 'store_name' => $quote->getStore()->getName(),
                 'custom_information' =>
                     'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
                     'Plugin Version : ' . $this->coreHelper->getVersion(),
-                'platform_id' => $this->config::PLATFORM_ID
+                'platform_id' => $this->config::PLATFORM_ID,
+                'request_payment_authorization' => true
             ];
         }
 
