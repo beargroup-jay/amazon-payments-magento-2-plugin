@@ -25,6 +25,8 @@ class CaptureStrategyCommand implements CommandInterface
 
     const CAPTURE = 'settlement';
 
+    const AUTHORIZE_CAPTURE = 'capture';
+
     /**
      * @var CommandPoolInterface
      */
@@ -90,10 +92,20 @@ class CaptureStrategyCommand implements CommandInterface
     {
         $isCaptured = $this->captureTransactionExists($payment);
 
+        // check if a transaction has happened and is captured
         if (!$payment->getAuthorizationTransaction() && !$isCaptured) {
-            return self::SALE;
+
+            if ($this->coreHelper->getPaymentAction() == 'authorize_capture') {
+                // charge on order
+                return self::SALE;
+            }
+            else {
+                // charge on invoice/shipment
+                return self::AUTHORIZE_CAPTURE;
+            }
         }
 
+        // capture on settlement/invoice
         if (!$isCaptured && $this->isAuthorized($payment)) {
             return self::CAPTURE;
         }
@@ -103,7 +115,7 @@ class CaptureStrategyCommand implements CommandInterface
             self::SALE;
         }
 
-        return self::CAPTURE;
+        return self::AUTHORIZE_CAPTURE;
     }
 
     /**
