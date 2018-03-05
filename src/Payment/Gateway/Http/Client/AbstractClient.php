@@ -17,11 +17,16 @@
 namespace Amazon\Payment\Gateway\Http\Client;
 
 use Magento\Payment\Gateway\Http\ClientInterface;
-use Magento\Payment\Model\Method\Logger;
 use Magento\Payment\Gateway\Http\TransferInterface;
-use Amazon\Core\Exception\AmazonServiceUnavailableException;
+use Amazon\Core\Helper\CategoryExclusion;
+use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
+use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Core\Exception\AmazonServiceUnavailableException;
+use Amazon\Core\Helper\Data;
+use Amazon\Payment\Domain\AmazonAuthorizationResponseFactory;
+use Amazon\Payment\Domain\AmazonCaptureResponseFactory;
 
 /**
  * Class AbstractClient
@@ -45,21 +50,62 @@ abstract class AbstractClient implements ClientInterface
      */
     protected $clientFactory;
 
+    /**
+     * @var CategoryExclusion
+     */
+    private $categoryExclusion;
+
+    /**
+     * @var AmazonSetOrderDetailsResponseFactory
+     */
+    private $amazonSetOrderDetailsResponseFactory;
+
+    /**
+     * @var Data
+     */
+    protected $coreHelper;
+
+    /**
+     * @var AmazonAuthorizationResponseFactory
+     */
+    private $amazonAuthorizationResponseFactory;
+
+    /**
+     * @var AmazonCaptureResponseFactory
+     */
+    protected $amazonCaptureResponseFactory;
+
 
     /**
      * AbstractClient constructor.
      * @param Logger $logger
      * @param ClientFactoryInterface $clientFactory
      * @param ApiHelper $apiHelper
+     * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
+     * @param AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory
+     * @param AmazonCaptureResponseFactory $amazonCaptureResponseFactory
+     * @param CategoryExclusion $categoryExclusion
+     * @param Data $coreHelper
      */
     public function __construct(
         Logger $logger,
         ClientFactoryInterface $clientFactory,
-        ApiHelper $apiHelper
-    ) {
-        $this->logger = $logger;
-        $this->clientFactory = $clientFactory;
+        ApiHelper $apiHelper,
+        AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
+        AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory,
+        AmazonCaptureResponseFactory $amazonCaptureResponseFactory,
+        CategoryExclusion $categoryExclusion,
+        Data $coreHelper
+    )
+    {
         $this->apiHelper = $apiHelper;
+        $this->clientFactory = $clientFactory;
+        $this->logger = $logger;
+        $this->categoryExclusion = $categoryExclusion;
+        $this->amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
+        $this->amazonAuthorizationResponseFactory = $amazonAuthorizationResponseFactory;
+        $this->coreHelper = $coreHelper;
+        $this->amazonCaptureResponseFactory = $amazonCaptureResponseFactory;
     }
 
     /**
@@ -92,6 +138,80 @@ abstract class AbstractClient implements ClientInterface
         return $response;
     }
 
+
+    /**
+     * @return bool
+     */
+    protected function checkForExcludedProducts()
+    {
+        if ($this->categoryExclusion->isQuoteDirty()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Sets Amazon payment order data
+     * @param $storeId
+     * @param $data
+     * @return array
+     * @throws AmazonServiceUnavailableException
+     */
+    protected function setOrderReferenceDetails($storeId, $data) {
+        $response = [];
+
+        try {
+            $responseParser = $this->clientFactory->create($storeId)->setOrderReferenceDetails($data);
+            $response = [
+                'status' => $responseParser->response['Status']
+            ];
+        } catch (\Exception $e) {
+            $log['error'] = $e->getMessage();
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
+        }
+
+        return $response;
+    }
+
+    /**
+     * Confirms that payment has been created for Amazon Pay
+     * @param $storeId
+     * @param $amazonOrderReferenceId
+     * @return array
+     * @throws AmazonServiceUnavailableException
+     */
+    protected function confirmOrderReference($storeId, $amazonOrderReferenceId)
+    {
+        $response = [];
+        try {
+            $response = $this->clientFactory->create($storeId)->confirmOrderReference(
+                [
+                    'amazon_order_reference_id' => $amazonOrderReferenceId
+                ]
+            );
+        } catch (\Exception $e) {
+            $log['error'] = $e->getMessage();
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
+        }
+
+        return $response;
+    }
+
+    /**
+     * Retrieves authorization data from Amazon Pay
+     * @param $storeId
+     * @param $data
+     * @return mixed
+     */
+    protected function getAuthorization($storeId, $data) {
+        $client = $this->clientFactory->create($storeId);
+
+        $responseParser       = $client->authorize($data);
+        $response             = $this->amazonAuthorizationResponseFactory->create(['response' => $responseParser]);
+        return $response->getDetails();
+    }
 
     /**
      * Process http request

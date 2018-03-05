@@ -17,18 +17,15 @@
 namespace Amazon\Payment\Gateway\Response;
 
 use Magento\Payment\Gateway\Response\HandlerInterface;
-use Amazon\Core\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
-use Magento\Framework\Message\ManagerInterface;
+use Amazon\Core\Helper\Data;
+use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 class SettlementHandler implements HandlerInterface
 {
-
-    /**
-     * @var ManagerInterface
-     */
-    private $messageManager;
 
     /**
      * @var Logger
@@ -45,25 +42,37 @@ class SettlementHandler implements HandlerInterface
      */
     private $coreHelper;
 
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $orderRepository;
 
     /**
-     * RefundHandler constructor.
+     * @var CartRepositoryInterface
+     */
+    private $quoteRepository;
+
+    /**
+     * SettlementHandler constructor.
      * @param Logger $logger
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
-     * @param $messageManager
+     * @param OrderRepositoryInterface $orderRepository
+     * @param CartRepositoryInterface $quoteRepository
      */
     public function __construct(
         Logger $logger,
         ApiHelper $apiHelper,
         Data $coreHelper,
-        ManagerInterface $messageManager
+        OrderRepositoryInterface $orderRepository,
+        CartRepositoryInterface $quoteRepository
     )
     {
         $this->logger = $logger;
         $this->apiHelper = $apiHelper;
         $this->coreHelper = $coreHelper;
-        $this->messageManager = $messageManager;
+        $this->orderRepository = $orderRepository;
+        $this->quoteRepository = $quoteRepository;
     }
 
     /**
@@ -72,14 +81,47 @@ class SettlementHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (isset($response['status']) && $response['status'] != 200) {
-            $this->messageManager->addErrorMessage(
-                'Amazon Order ID is incorrect.'
-            );
+        if (!isset($handlingSubject['payment'])
+            || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
+        ) {
+            throw new \InvalidArgumentException('Payment data object should be provided');
+        }
+
+        $paymentDO = $handlingSubject['payment'];
+
+        $payment = $paymentDO->getPayment();
+
+        $orderDO = $paymentDO->getOrder();
+
+        $order = $this->orderRepository->get($orderDO->getId());
+
+        $quote = $this->quoteRepository->get($order->getQuoteId());
+
+        $quoteLink = $this->apiHelper->getQuoteLink($quote->getId());
+
+        // if reauthorized, treat as end of auth + capture process
+        if ($response['reauthorized']) {
+
+            // TODO check if item is async without transaction info and add to pending auth table.
+            if ($response['status']) {
+                $payment->setTransactionId($response['capture_transaction_id']);
+                $payment->setParentTransactionId($response['authorize_transaction_id']);
+                $payment->setIsTransactionClosed(true);
+
+                $quoteLink = $this->apiHelper->getQuoteLink();
+                $quoteLink->setConfirmed(true)->save();
+
+                $message = __('Captured amount of %1 online', $order->getGrandTotal());
+                $message .= ' ' . __('Transaction ID: "%1"', $quoteLink->getAmazonOrderReferenceId());
+
+                $order->setStatus($this->coreHelper->getNewOrderStatus());
+                $order->addStatusHistoryComment($message);
+
+            }
         }
         else {
-            // TODO: finish creating invoice/authorize payment
-            //$this->messageManager->addSuccessMessage('Successfully sent refund for '.$handlingSubject['amount'].' amount to AmazonPay');
+            // finish capture
+            $payment->setTransactionId($response['transaction_id']);
         }
     }
 

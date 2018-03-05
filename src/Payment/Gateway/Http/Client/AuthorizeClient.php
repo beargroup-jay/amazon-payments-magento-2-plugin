@@ -16,14 +16,6 @@
 
 namespace Amazon\Payment\Gateway\Http\Client;
 
-use Magento\Payment\Model\Method\Logger;
-use Amazon\Core\Client\ClientFactoryInterface;
-use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
-use Amazon\Core\Helper\CategoryExclusion;
-use Amazon\Core\Exception\AmazonServiceUnavailableException;
-use Amazon\Core\Helper\Data;
-use Amazon\Payment\Domain\AmazonAuthorizationResponseFactory;
 
 /**
  * Class Client
@@ -31,46 +23,6 @@ use Amazon\Payment\Domain\AmazonAuthorizationResponseFactory;
  */
 class AuthorizeClient extends AbstractClient
 {
-
-    /**
-     * @var AmazonSetOrderDetailsResponseFactory
-     */
-    private $amazonSetOrderDetailsResponseFactory;
-
-    /**
-     * @var CategoryExclusion
-     */
-    private $categoryExclusion;
-
-    private $coreHelper;
-
-    private $amazonAuthorizationResponseFactory;
-
-    /**
-     * AuthorizeClient constructor.
-     * @param Logger $logger
-     * @param ClientFactoryInterface $clientFactory
-     * @param ApiHelper $apiHelper
-     * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
-     * @param CategoryExclusion $categoryExclusion
-     */
-    public function __construct(
-        Logger $logger,
-        ClientFactoryInterface $clientFactory,
-        ApiHelper $apiHelper,
-        AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
-        AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory,
-        CategoryExclusion $categoryExclusion,
-        Data $coreHelper
-    )
-    {
-        $this->amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
-        $this->amazonAuthorizationResponseFactory = $amazonAuthorizationResponseFactory;
-        $this->categoryExclusion = $categoryExclusion;
-        $this->coreHelper = $coreHelper;
-        parent::__construct($logger, $clientFactory, $apiHelper);
-
-    }
 
     /**
      * @inheritdoc
@@ -121,58 +73,4 @@ class AuthorizeClient extends AbstractClient
         return $response;
     }
 
-    private function getAuthorization($storeId, $data) {
-        $client = $this->clientFactory->create($storeId);
-
-        $responseParser       = $client->authorize($data);
-        $response             = $this->amazonAuthorizationResponseFactory->create(['response' => $responseParser]);
-        return $response->getDetails();
-    }
-
-    private function setOrderReferenceDetails($storeId, $data) {
-        $response = [];
-
-        try {
-        $responseParser = $this->clientFactory->create($storeId)->setOrderReferenceDetails($data);
-        $response = [
-          'status' => $responseParser->response['Status']
-        ];
-        } catch (\Exception $e) {
-            $log['error'] = $e->getMessage();
-            $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
-        }
-
-        return $response;
-    }
-
-    private function confirmOrderReference($storeId, $amazonOrderReferenceId)
-    {
-        $response = [];
-        try {
-            $response = $this->clientFactory->create($storeId)->confirmOrderReference(
-                [
-                    'amazon_order_reference_id' => $amazonOrderReferenceId
-                ]
-            );
-        } catch (\Exception $e) {
-            $log['error'] = $e->getMessage();
-            $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
-        }
-
-        return $response;
-    }
-
-
-    /**
-     * @return bool
-     */
-    private function checkForExcludedProducts()
-    {
-        if ($this->categoryExclusion->isQuoteDirty()) {
-            return false;
-        }
-        return true;
-    }
 }

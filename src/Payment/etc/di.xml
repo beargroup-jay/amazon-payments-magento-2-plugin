@@ -36,12 +36,6 @@
         </arguments>
     </virtualType>
 
-    <type name="Amazon\Payment\Gateway\Http\Client\Client">
-        <arguments>
-            <argument name="logger" xsi:type="object">AmazonLogger</argument>
-        </arguments>
-    </type>
-
     <!-- Commands infrastructure -->
     <virtualType name="AmazonCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
@@ -93,15 +87,7 @@
         </arguments>
     </virtualType>
 
-    <!-- Authorization Request -->
-    <virtualType name="AmazonAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
-        <arguments>
-            <argument name="builders" xsi:type="array">
-                <item name="transaction" xsi:type="string">Amazon\Payment\Gateway\Request\AuthorizationRequest</item>
-                <item name="authorizeData" xsi:type="string">Amazon\Payment\Gateway\Request\AuthorizeDataRequest</item>
-            </argument>
-        </arguments>
-    </virtualType>
+
     <type name="Amazon\Payment\Gateway\Request\AuthorizationRequest">
         <arguments>
             <argument name="config" xsi:type="object">AmazonGatewayConfig</argument>
@@ -125,7 +111,7 @@
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\SettlementRequest</argument>
             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\SettlementHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\SettlementClient</argument>
         </arguments>
     </virtualType>
@@ -168,17 +154,6 @@
         </arguments>
     </type>
 
-
-    <!-- Response handlers -->
-    <virtualType name="AmazonCaptureResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
-        <arguments>
-            <argument name="handlers" xsi:type="array">
-                <item name="verifyOrder" xsi:type="string">Amazon\Payment\Gateway\Response\VerifyOrderHandler</item>
-                <item name="txnid" xsi:type="string">Amazon\Payment\Gateway\Response\TransactionIdHandler</item>
-                <item name="completeCapture" xsi:type="string">Amazon\Payment\Gateway\Response\CompleteCaptureHandler</item>
-            </argument>
-        </arguments>
-    </virtualType>
 
     <!-- Value handlers infrastructure -->
     <virtualType name="AmazonValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">

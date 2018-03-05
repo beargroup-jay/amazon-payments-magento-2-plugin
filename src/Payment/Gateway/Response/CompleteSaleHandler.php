@@ -21,7 +21,6 @@ use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
 use Amazon\Core\Helper\Data;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
-use Magento\Sales\Api\TransactionRepositoryInterface;
 
 class CompleteSaleHandler implements HandlerInterface
 {
@@ -41,8 +40,6 @@ class CompleteSaleHandler implements HandlerInterface
      */
     private $apiHelper;
 
-    private $transactionRepository;
-
     /**
      * CompleteAuthHandler constructor.
      * @param Logger $logger
@@ -52,19 +49,18 @@ class CompleteSaleHandler implements HandlerInterface
     public function __construct(
         Logger $logger,
         ApiHelper $apiHelper,
-        Data $coreHelper,
-        TransactionRepositoryInterface $transactionRepository
+        Data $coreHelper
     )
     {
         $this->logger = $logger;
         $this->apiHelper = $apiHelper;
         $this->coreHelper = $coreHelper;
-        $this->transactionRepository = $transactionRepository;
     }
 
     /**
      * @param array $handlingSubject
      * @param array $response
+     * @throws \Exception
      */
     public function handle(array $handlingSubject, array $response)
     {

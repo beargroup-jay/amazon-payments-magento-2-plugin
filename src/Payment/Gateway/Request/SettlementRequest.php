@@ -17,14 +17,14 @@ namespace Amazon\Payment\Gateway\Request;
 
 use Amazon\Payment\Gateway\Config\Config;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
-use Amazon\Core\Client\ClientFactoryInterface;
-use Amazon\Payment\Domain\AmazonCaptureDetailsResponseFactory;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\ApiHelper;
 use Amazon\Core\Helper\Data;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 class SettlementRequest implements BuilderInterface
 {
@@ -53,30 +53,38 @@ class SettlementRequest implements BuilderInterface
      */
     private $coreHelper;
 
-    private $amazonCaptureDetailsResponse;
-
-    private $clientFactory;
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private $orderRepository;
 
     /**
-     * CaptureRequest constructor.
-     *
+     * @var CartRepositoryInterface
+     */
+    private $quoteRepository;
+
+    /**
+     * SettlementRequest constructor.
      * @param Config $config
      * @param ProductMetadata $productMetadata
+     * @param OrderRepositoryInterface $orderRepository
+     * @param CartRepositoryInterface $quoteRepository
      * @param ApiHelper $apiHelper
      * @param Data $coreHelper
      * @param Logger $logger
      */
     public function __construct(
         Config $config,
-        AmazonCaptureDetailsResponseFactory $amazonCaptureDetailsResponse,
-        ClientFactoryInterface $clientFactory,
         ProductMetaData $productMetadata,
+        OrderRepositoryInterface $orderRepository,
+        CartRepositoryInterface $quoteRepository,
         ApiHelper $apiHelper,
         Data $coreHelper,
         Logger $logger
     ) {
         $this->config = $config;
-        $this->amazonCaptureDetailsResponse = $amazonCaptureDetailsResponse;
+        $this->orderRepository = $orderRepository;
+        $this->quoteRepository = $quoteRepository;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->apiHelper = $apiHelper;
@@ -94,6 +102,7 @@ class SettlementRequest implements BuilderInterface
         $data = [];
 
         if (!isset($buildSubject['payment'])
+            || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
         ) {
             throw new \InvalidArgumentException('Payment data object should be provided');
         }
@@ -104,46 +113,27 @@ class SettlementRequest implements BuilderInterface
 
         $order = $this->orderRepository->get($orderDO->getId());
 
-        $quoteLink = $this->apiHelper->getQuoteLink($order->getQuoteId());
+        $quote = $this->quoteRepository->get($order->getQuoteId());
+
+        $quoteLink = $this->apiHelper->getQuoteLink($quote->getId());
 
         if ($quoteLink) {
 
-
-
-        }
-/*
-        if ($this->coreHelper->getCurrencyCode() !== $order->getCurrencyCode()) {
-            throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
-        }
-
-        $quote = $this->apiHelper->getQuote();
-
-        if (!$quote->getReservedOrderId()) {
-            try {
-                $quote->reserveOrderId()->save();
-            }
-            catch(\Exception $e) {
-                $this->logger->debug($e->getMessage());
-            }
-        }
-
-        $amazonId = $this->apiHelper->getAmazonId();
-
-        if ($order && $amazonId) {
-
             $data = [
-                'amazon_order_reference_id' => $amazonId,
-                'amount' => $order->getGrandTotalAmount(),
-                'currency_code' => $order->getCurrencyCode(),
-                'seller_order_id' => $order->getOrderIncrementId(),
+                'amazon_authorization_id' => $paymentDO->getPayment()->getParentTransactionId(),
+                'capture_amount' => $buildSubject['amount'],
+                'currency_code' => $order->getBaseCurrencyCode(),
+                'amazon_order_reference_id' => $quoteLink->getAmazonOrderReferenceId(),
+                'store_id' => $quote->getStoreId(),
                 'store_name' => $quote->getStore()->getName(),
+                'seller_order_id' => $order->getIncrementId(),
                 'custom_information' =>
                     'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
                     'Plugin Version : ' . $this->coreHelper->getVersion(),
-                'platform_id' => $this->config::PLATFORM_ID
+                'platform_id' => $this->config::PLATFORM_ID,
             ];
         }
-*/
+
         return $data;
     }
 

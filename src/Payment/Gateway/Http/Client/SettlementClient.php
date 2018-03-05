@@ -16,12 +16,7 @@
 
 namespace Amazon\Payment\Gateway\Http\Client;
 
-use Magento\Payment\Model\Method\Logger;
-use Amazon\Core\Client\ClientFactoryInterface;
-use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
-use Amazon\Core\Helper\CategoryExclusion;
-use Amazon\Core\Exception\AmazonWebapiException;
+use Amazon\Core\Exception\AmazonServiceUnavailableException;
 
 /**
  * Class SettlementClient
@@ -30,75 +25,157 @@ use Amazon\Core\Exception\AmazonWebapiException;
 class SettlementClient extends AbstractClient
 {
 
-    /**
-     * @var AmazonSetOrderDetailsResponseFactory
-     */
-    private $amazonSetOrderDetailsResponseFactory;
-
-    /**
-     * @var CategoryExclusion
-     */
-    private $categoryExclusion;
-
-    /**
-     * Client constructor.
-     * @param Logger $logger
-     * @param ClientFactoryInterface $clientFactory
-     * @param ApiHelper $apiHelper
-     * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
-     * @param CategoryExclusion $categoryExclusion
-     */
-    public function __construct(
-        Logger $logger,
-        ClientFactoryInterface $clientFactory,
-        ApiHelper $apiHelper,
-        AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
-        CategoryExclusion $categoryExclusion
-    )
-    {
-        parent::__construct($logger, $clientFactory, $apiHelper);
-        $this->amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
-        $this->categoryExclusion = $categoryExclusion;
-    }
 
     /**
      * @inheritdoc
      */
     protected function process(array $data)
     {
-        /*
-        $this->checkForExcludedProducts();
+        $response = [];
 
-        $storeId = $this->apiHelper->getStoreId();
+        // check to see if authorization is still valid
+        if ($this->checkAuthorizationStatus($data)) {
+            $captureData = [
+                'amazon_authorization_id' => $data['amazon_authorization_id'],
+                'capture_amount' => $data['capture_amount'],
+                'currency_code' => $data['currency_code'],
+                'capture_reference_id' => $data['amazon_order_reference_id'] . '-C' . time()
+            ];
 
-        $responseParser = $this->clientFactory->create($storeId)->setOrderReferenceDetails($data);
-        $amazonResponse = $this->amazonSetOrderDetailsResponseFactory->create([
-            'response' => $responseParser
-        ]);
+            $response = $this->completeCapture($captureData, $data['store_id']);
+        } else {
 
-        // Gateway expects response to be in form of array
-        return [
-            'status' => $responseParser->response['Status'],
-            'constraints' => $amazonResponse->getConstraints(),
-            'responseBody' => $responseParser->response['ResponseBody']
-        ];
-*/
-        return [];
+            $captureData = [
+                'amazon_order_reference_id' => $data['amazon_order_reference_id'],
+                'amount' => $data['capture_amount'],
+                'currency_code' => $data['currency_code'],
+                'seller_order_id' => $data['seller_order_id'],
+                'store_name' => $data['store_name'],
+                'custom_information' => $data['custom_information'],
+                'platform_id' => $data['platform_id']
+            ];
+            $response = $this->authorizeAndCapture($captureData, $data['store_id']);
+            $response['reauthorized'] = true;
+        }
+
+        return $response;
     }
 
     /**
-     * @throws AmazonWebapiException
+     * @param $data
+     * @param $storeId
+     * @return null
+     * @throws AmazonServiceUnavailableException
      */
-    private function checkForExcludedProducts()
+    private function completeCapture($data, $storeId)
     {
-        if ($this->categoryExclusion->isQuoteDirty()) {
-            throw new AmazonWebapiException(
-                __(
-                    'Unfortunately it is not possible to pay with Amazon Pay for this order. Please choose another payment method.'
-                ),
-                AmazonAuthorizationStatus::CODE_HARD_DECLINE,
-                AmazonWebapiException::HTTP_FORBIDDEN
-            );
+        $response = [];
+
+        try {
+            $responseParser = $this->clientFactory->create($storeId)->capture($data);
+            if ($responseParser->response['Status'] == 200) {
+                $captureResponse = $this->amazonCaptureResponseFactory->create(['response' => $responseParser]);
+                    $capture = $captureResponse->getDetails();
+                // TODO check status against Amazon\Payment\Domain\Validator\AmazonCapture validation
+
+                $response = [
+                    'status' => true,
+                    'transaction_id' => $capture->getTransactionId(),
+                    'reauthorized' => false
+                ];
+            }
+            else {
+                // TODO: better handle a capture operation that has already succeeded.
+                throw new AmazonServiceUnavailableException();
+            }
+        } catch (\Exception $e) {
+            $log['error'] = $e->getMessage();
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
         }
+
+        return $response;
+    }
+
+    /**
+     * @param $data
+     * @param $storeId
+     * @return array
+     * @throws AmazonServiceUnavailableException
+     */
+    private function authorizeAndCapture($data, $storeId)
+    {
+        $response = [];
+
+        if ($this->checkForExcludedProducts()) {
+
+
+            $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
+
+            $authorizeData = [
+                'amazon_order_reference_id' => $data['amazon_order_reference_id'],
+                'authorization_amount' => $data['amount'],
+                'currency_code' => $data['currency_code'],
+                'authorization_reference_id' => $data['amazon_order_reference_id'] . '-A' . time(),
+                'capture_now' => true
+            ];
+
+            if ($authMode == 'synchronous') {
+                $authorizeData['transaction_timeout'] = 0;
+            }
+
+            $response['status'] = false;
+            $response['auth_mode'] = $authMode;
+            $response['amazon_order_reference_id'] = $data['amazon_order_reference_id'];
+
+            $detailResponse = $this->setOrderReferenceDetails($storeId, $data);
+
+            if ($detailResponse['status'] == 200) {
+                $confirmResponse = $this->confirmOrderReference($storeId, $data['amazon_order_reference_id']);
+
+                if ($confirmResponse->response['Status'] == 200) {
+                    $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
+
+                    if ($authorizeResponse) {
+                        $response['capture_transaction_id'] = $authorizeResponse->getCaptureTransactionId();
+                        $response['authorize_transaction_id'] = $authorizeResponse->getAuthorizeTransactionId();
+                        $response['status'] = true;
+
+                    }
+                }
+            }
+        }
+
+        return $response;
+    }
+
+
+    /**
+     * @param $data
+     * @return bool
+     * @throws AmazonServiceUnavailableException
+     */
+    private function checkAuthorizationStatus($data)
+    {
+
+        $authorizeData = [
+            'amazon_authorization_id' => $data['amazon_authorization_id']
+        ];
+
+        $storeId = $data['store_id'];
+
+        try {
+            $responseParser = $this->clientFactory->create($storeId)->getAuthorizationDetails($authorizeData);
+            if ($responseParser->response['Status'] != 200) {
+                return false;
+            }
+        } catch (\Exception $e) {
+            $log['error'] = $e->getMessage();
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
+        }
+
+
+        return true;
     }
 }

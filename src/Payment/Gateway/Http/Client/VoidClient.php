@@ -17,9 +17,6 @@
 namespace Amazon\Payment\Gateway\Http\Client;
 
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
-use Magento\Payment\Model\Method\Logger;
-use Amazon\Core\Client\ClientFactoryInterface;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
 
 /**
  * Class VoidClient
@@ -28,20 +25,7 @@ use Amazon\Payment\Gateway\Helper\ApiHelper;
 class VoidClient extends AbstractClient
 {
 
-    /**
-     * VoidClient constructor.
-     * @param Logger $logger
-     * @param ClientFactoryInterface $clientFactory
-     * @param ApiHelper $apiHelper
-     */
-    public function __construct(
-        Logger $logger,
-        ClientFactoryInterface $clientFactory,
-        ApiHelper $apiHelper
-    )
-    {
-        parent::__construct($logger, $clientFactory, $apiHelper);
-    }
+
 
     /**
      * @inheritdoc
