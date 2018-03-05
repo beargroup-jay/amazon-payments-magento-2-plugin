@@ -22,6 +22,10 @@ use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
+/**
+ * Class RefundRequest
+ * @package Amazon\Payment\Gateway\Request
+ */
 class RefundRequest implements BuilderInterface
 {
 
@@ -46,10 +50,11 @@ class RefundRequest implements BuilderInterface
     private $orderRepository;
 
     /**
-     * AuthorizationRequest constructor.
+     * RefundRequest constructor.
      * @param ProductMetadata $productMetadata
      * @param SubjectReader $subjectReader
      * @param Data $coreHelper
+     * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
         ProductMetaData $productMetadata,
@@ -66,8 +71,6 @@ class RefundRequest implements BuilderInterface
     }
 
     /**
-     * Builds ENV request
-     *
      * @param array $buildSubject
      * @return array
      */
@@ -77,6 +80,8 @@ class RefundRequest implements BuilderInterface
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
 
+        $payment = $paymentDO->getPayment();
+
         $orderDO = $paymentDO->getOrder();
 
         $order = $this->orderRepository->get($orderDO->getId());
@@ -85,9 +90,9 @@ class RefundRequest implements BuilderInterface
 
         if ($quoteLink) {
             $data = [
-                'amazon_capture_id' => $quoteLink->getAmazonOrderReferenceId(),
+                'amazon_capture_id' => $payment->getParentTransactionId(),
                 'refund_reference_id' => $quoteLink->getAmazonOrderReferenceId() . '-R' . time(),
-                'refund_amount' => $buildSubject['amount'],
+                'refund_amount' => $this->subjectReader->readAmount($buildSubject),
                 'currency_code' => $order->getOrderCurrencyCode(),
                 'store_id' => $order->getStoreId()
             ];

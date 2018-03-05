@@ -86,6 +86,7 @@ class VoidRequest implements BuilderInterface
 
             if ($quoteLink) {
                 $data = [
+                    'store_id' => $order->getStoreId(),
                     'amazon_order_reference_id' => $quoteLink->getAmazonOrderReferenceId()
                 ];
             }

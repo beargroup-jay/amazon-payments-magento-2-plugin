@@ -22,6 +22,10 @@ use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Magento\Framework\Message\ManagerInterface;
 
+/**
+ * Class RefundHandler
+ * @package Amazon\Payment\Gateway\Response
+ */
 class RefundHandler implements HandlerInterface
 {
 
@@ -78,7 +82,7 @@ class RefundHandler implements HandlerInterface
             );
         }
         else {
-            $this->messageManager->addSuccessMessage('Successfully sent refund for '.$handlingSubject['amount'].' amount to AmazonPay');
+            $this->messageManager->addSuccessMessage('Successfully sent refund for '.$handlingSubject['amount'].' amount to Amazon Pay');
         }
     }
 

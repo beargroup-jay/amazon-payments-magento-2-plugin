@@ -16,12 +16,10 @@
 namespace Amazon\Payment\Gateway\Request;
 
 use Amazon\Payment\Gateway\Config\Config;
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\Method\Logger;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -95,7 +93,7 @@ class SettlementRequest implements BuilderInterface
     /**
      * @param array $buildSubject
      * @return array
-     * @throws LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function build(array $buildSubject)
     {
@@ -130,9 +128,6 @@ class SettlementRequest implements BuilderInterface
 
         return $data;
     }
-
-
-
 
 }
 
