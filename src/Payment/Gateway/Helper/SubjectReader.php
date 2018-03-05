@@ -19,16 +19,18 @@ namespace Amazon\Payment\Gateway\Helper;
 use Magento\Checkout\Model\Session;
 use Amazon\Payment\Api\Data\QuoteLinkInterfaceFactory;
 use Amazon\Core\Helper\Data;
-
+use Magento\Quote\Model\Quote;
+use Magento\Payment\Gateway\Helper;
+use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 
 /**
- * Class ApiHelper
+ * Class SubjectReader
  *
  * Consolidates commonly used calls
  *
  * @package Amazon\Payment\Gateway\Helper
  */
-class ApiHelper
+class SubjectReader
 {
 
     /**
@@ -47,7 +49,7 @@ class ApiHelper
     private $coreHelper;
 
     /**
-     * ApiHelper constructor.
+     * SubjectReader constructor.
      *
      * @param Session $checkoutSession
      * @param QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
@@ -61,6 +63,30 @@ class ApiHelper
         $this->quoteLinkFactory = $quoteLinkInterfaceFactory;
         $this->checkoutSession = $checkoutSession;
         $this->coreHelper = $coreHelper;
+    }
+
+
+    /**
+     * Reads payment from subject
+     *
+     * @param array $subject
+     * @return PaymentDataObjectInterface
+     */
+    public function readPayment(array $subject)
+    {
+        return Helper\SubjectReader::readPayment($subject);
+    }
+
+
+    /**
+     * Reads amount from subject
+     *
+     * @param array $subject
+     * @return mixed
+     */
+    public function readAmount(array $subject)
+    {
+        return Helper\SubjectReader::readAmount($subject);
     }
 
     /**

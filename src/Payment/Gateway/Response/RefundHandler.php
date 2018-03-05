@@ -19,7 +19,7 @@ namespace Amazon\Payment\Gateway\Response;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Amazon\Core\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Magento\Framework\Message\ManagerInterface;
 
 class RefundHandler implements HandlerInterface
@@ -36,9 +36,9 @@ class RefundHandler implements HandlerInterface
     private $logger;
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    private $apiHelper;
+    private $subjectReader;
 
     /**
      * @var Data
@@ -49,19 +49,19 @@ class RefundHandler implements HandlerInterface
     /**
      * RefundHandler constructor.
      * @param Logger $logger
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param Data $coreHelper
      * @param $messageManager
      */
     public function __construct(
         Logger $logger,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         Data $coreHelper,
         ManagerInterface $messageManager
     )
     {
         $this->logger = $logger;
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;
         $this->messageManager = $messageManager;
     }

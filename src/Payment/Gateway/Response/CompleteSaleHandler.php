@@ -18,7 +18,7 @@ namespace Amazon\Payment\Gateway\Response;
 
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Magento\Payment\Model\Method\Logger;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 
@@ -36,24 +36,24 @@ class CompleteSaleHandler implements HandlerInterface
     private $logger;
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    private $apiHelper;
+    private $subjectReader;
 
     /**
      * CompleteAuthHandler constructor.
      * @param Logger $logger
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param Data $coreHelper
      */
     public function __construct(
         Logger $logger,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         Data $coreHelper
     )
     {
         $this->logger = $logger;
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;
     }
 
@@ -73,11 +73,11 @@ class CompleteSaleHandler implements HandlerInterface
 
         $paymentDO = $handlingSubject['payment'];
 
-        $amazonId = $this->apiHelper->getAmazonId();
+        $amazonId = $this->subjectReader->getAmazonId();
 
         $payment = $paymentDO->getPayment();
 
-        $order = $this->apiHelper->getOrder();
+        $order = $this->subjectReader->getOrder();
 
 
         // TODO check if item is async without transaction info and add to pending auth table.
@@ -86,7 +86,7 @@ class CompleteSaleHandler implements HandlerInterface
             $payment->setParentTransactionId($response['authorize_transaction_id']);
             $payment->setIsTransactionClosed(true);
 
-            $quoteLink = $this->apiHelper->getQuoteLink();
+            $quoteLink = $this->subjectReader->getQuoteLink();
             $quoteLink->setConfirmed(true)->save();
 
             $message = __('Captured amount of %1 online', $order->getGrandTotal());

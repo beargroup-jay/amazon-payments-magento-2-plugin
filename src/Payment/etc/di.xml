@@ -94,7 +94,7 @@
         </arguments>
     </type>
 
-    <!-- Capture command -->
+    <!-- Authorize and Capture command -->
     <virtualType name="AmazonSaleCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequest</argument>
@@ -105,7 +105,7 @@
         </arguments>
     </virtualType>
 
-    <!-- Capture command -->
+    <!-- Capture settlement command -->
     <virtualType name="AmazonSettlementCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\SettlementRequest</argument>
@@ -217,9 +217,7 @@
             <argument name="adminNotifier" xsi:type="object">Magento\Framework\Notification\NotifierInterface\Proxy</argument>
         </arguments>
     </type>
-    <!--type name="Magento\Sales\Api\TransactionRepositoryInterface">
-        <plugin name="amazon_payment_transaction_repository" type="Amazon\Payment\Plugin\TransactionRepository" sortOrder="1" />
-    </type-->
+
     <type name="Amazon\Payment\Api\Ipn\CompositeProcessorInterface">
         <arguments>
             <argument name="processors" xsi:type="array">

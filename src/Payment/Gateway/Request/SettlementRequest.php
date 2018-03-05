@@ -19,7 +19,7 @@ use Amazon\Payment\Gateway\Config\Config;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\Method\Logger;
@@ -44,9 +44,9 @@ class SettlementRequest implements BuilderInterface
     private $productMetaData;
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    private $apiHelper;
+    private $subjectReader;
 
     /**
      * @var Data
@@ -69,7 +69,7 @@ class SettlementRequest implements BuilderInterface
      * @param ProductMetadata $productMetadata
      * @param OrderRepositoryInterface $orderRepository
      * @param CartRepositoryInterface $quoteRepository
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param Data $coreHelper
      * @param Logger $logger
      */
@@ -78,7 +78,7 @@ class SettlementRequest implements BuilderInterface
         ProductMetaData $productMetadata,
         OrderRepositoryInterface $orderRepository,
         CartRepositoryInterface $quoteRepository,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         Data $coreHelper,
         Logger $logger
     ) {
@@ -87,7 +87,7 @@ class SettlementRequest implements BuilderInterface
         $this->quoteRepository = $quoteRepository;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->logger = $logger;
     }
 
@@ -101,13 +101,7 @@ class SettlementRequest implements BuilderInterface
     {
         $data = [];
 
-        if (!isset($buildSubject['payment'])
-            || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
-        }
-
-        $paymentDO = $buildSubject['payment'];
+        $paymentDO = $this->subjectReader->readPayment($buildSubject);
 
         $orderDO = $paymentDO->getOrder();
 
@@ -115,7 +109,7 @@ class SettlementRequest implements BuilderInterface
 
         $quote = $this->quoteRepository->get($order->getQuoteId());
 
-        $quoteLink = $this->apiHelper->getQuoteLink($quote->getId());
+        $quoteLink = $this->subjectReader->getQuoteLink($quote->getId());
 
         if ($quoteLink) {
 

@@ -19,7 +19,7 @@ use Amazon\Payment\Gateway\Config\Config;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\Method\Logger;
@@ -42,9 +42,9 @@ class CaptureRequest implements BuilderInterface
     private $productMetaData;
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    private $apiHelper;
+    private $subjectReader;
 
     /**
      * @var Data
@@ -56,21 +56,21 @@ class CaptureRequest implements BuilderInterface
      *
      * @param Config $config
      * @param ProductMetadata $productMetadata
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param Data $coreHelper
      * @param Logger $logger
      */
     public function __construct(
         Config $config,
         ProductMetaData $productMetadata,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         Data $coreHelper,
         Logger $logger
     ) {
         $this->config = $config;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->logger = $logger;
     }
 
@@ -84,13 +84,7 @@ class CaptureRequest implements BuilderInterface
     {
         $data = [];
 
-        if (!isset($buildSubject['payment'])
-            || !$buildSubject['payment'] instanceof PaymentDataObjectInterface
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
-        }
-
-        $paymentDO = $buildSubject['payment'];
+        $paymentDO = $this->subjectReader->readPayment($buildSubject);
 
         $order = $paymentDO->getOrder();
 
@@ -98,7 +92,7 @@ class CaptureRequest implements BuilderInterface
             throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
         }
 
-        $quote = $this->apiHelper->getQuote();
+        $quote = $this->subjectReader->getQuote();
 
         if (!$quote->getReservedOrderId()) {
             try {
@@ -109,7 +103,7 @@ class CaptureRequest implements BuilderInterface
             }
         }
 
-        $amazonId = $this->apiHelper->getAmazonId();
+        $amazonId = $this->subjectReader->getAmazonId();
 
         if ($order && $amazonId) {
 

@@ -18,7 +18,7 @@ namespace Amazon\Payment\Gateway\Request;
 
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
@@ -31,9 +31,9 @@ class VoidRequest implements BuilderInterface
     private $productMetaData;
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    private $apiHelper;
+    private $subjectReader;
 
     /**
      * @var Data
@@ -48,20 +48,20 @@ class VoidRequest implements BuilderInterface
     /**
      * VoidRequest constructor.
      * @param ProductMetadata $productMetadata
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param Data $coreHelper
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
         ProductMetaData $productMetadata,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         Data $coreHelper,
         OrderRepositoryInterface $orderRepository
     )
     {
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->orderRepository = $orderRepository;
     }
 
@@ -75,19 +75,14 @@ class VoidRequest implements BuilderInterface
     {
         $data = [];
 
+        $paymentDO = $this->subjectReader->readPayment($buildSubject);
 
-        if (!isset($buildSubject['payment'])
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
-        }
-
-        $paymentDO = $buildSubject['payment'];
         $orderDO = $paymentDO->getOrder();
 
         $order = $this->orderRepository->get($orderDO->getId());
 
         if ($order) {
-            $quoteLink = $this->apiHelper->getQuoteLink($order->getQuoteId());
+            $quoteLink = $this->subjectReader->getQuoteLink($order->getQuoteId());
 
             if ($quoteLink) {
                 $data = [

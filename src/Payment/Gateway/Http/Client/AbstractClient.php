@@ -22,7 +22,7 @@ use Amazon\Core\Helper\CategoryExclusion;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Amazon\Core\Helper\Data;
 use Amazon\Payment\Domain\AmazonAuthorizationResponseFactory;
@@ -36,9 +36,9 @@ abstract class AbstractClient implements ClientInterface
 {
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    protected $apiHelper;
+    protected $subjectReader;
 
     /**
      * @var Logger
@@ -80,7 +80,7 @@ abstract class AbstractClient implements ClientInterface
      * AbstractClient constructor.
      * @param Logger $logger
      * @param ClientFactoryInterface $clientFactory
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
      * @param AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory
      * @param AmazonCaptureResponseFactory $amazonCaptureResponseFactory
@@ -90,7 +90,7 @@ abstract class AbstractClient implements ClientInterface
     public function __construct(
         Logger $logger,
         ClientFactoryInterface $clientFactory,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
         AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory,
         AmazonCaptureResponseFactory $amazonCaptureResponseFactory,
@@ -98,7 +98,7 @@ abstract class AbstractClient implements ClientInterface
         Data $coreHelper
     )
     {
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->clientFactory = $clientFactory;
         $this->logger = $logger;
         $this->categoryExclusion = $categoryExclusion;

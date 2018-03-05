@@ -33,7 +33,7 @@ class CaptureClient extends AbstractClient
 
         if ($this->checkForExcludedProducts()) {
 
-            $storeId = $this->apiHelper->getStoreId();
+            $storeId = $this->subjectReader->getStoreId();
 
             $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
 

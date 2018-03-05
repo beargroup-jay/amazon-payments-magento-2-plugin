@@ -18,7 +18,7 @@ namespace Amazon\Payment\Gateway\Response;
 
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use Magento\Payment\Model\Method\Logger;
-use Amazon\Payment\Gateway\Helper\ApiHelper;
+use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -33,9 +33,9 @@ class SettlementHandler implements HandlerInterface
     private $logger;
 
     /**
-     * @var ApiHelper
+     * @var SubjectReader
      */
-    private $apiHelper;
+    private $subjectReader;
 
     /**
      * @var Data
@@ -55,21 +55,21 @@ class SettlementHandler implements HandlerInterface
     /**
      * SettlementHandler constructor.
      * @param Logger $logger
-     * @param ApiHelper $apiHelper
+     * @param SubjectReader $subjectReader
      * @param Data $coreHelper
      * @param OrderRepositoryInterface $orderRepository
      * @param CartRepositoryInterface $quoteRepository
      */
     public function __construct(
         Logger $logger,
-        ApiHelper $apiHelper,
+        SubjectReader $subjectReader,
         Data $coreHelper,
         OrderRepositoryInterface $orderRepository,
         CartRepositoryInterface $quoteRepository
     )
     {
         $this->logger = $logger;
-        $this->apiHelper = $apiHelper;
+        $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;
         $this->orderRepository = $orderRepository;
         $this->quoteRepository = $quoteRepository;
@@ -97,7 +97,7 @@ class SettlementHandler implements HandlerInterface
 
         $quote = $this->quoteRepository->get($order->getQuoteId());
 
-        $quoteLink = $this->apiHelper->getQuoteLink($quote->getId());
+        $quoteLink = $this->subjectReader->getQuoteLink($quote->getId());
 
         // if reauthorized, treat as end of auth + capture process
         if ($response['reauthorized']) {
@@ -108,7 +108,7 @@ class SettlementHandler implements HandlerInterface
                 $payment->setParentTransactionId($response['authorize_transaction_id']);
                 $payment->setIsTransactionClosed(true);
 
-                $quoteLink = $this->apiHelper->getQuoteLink();
+                $quoteLink = $this->subjectReader->getQuoteLink();
                 $quoteLink->setConfirmed(true)->save();
 
                 $message = __('Captured amount of %1 online', $order->getGrandTotal());
