@@ -44,7 +44,7 @@ class SettlementClient extends AbstractClient
 
             $response = $this->completeCapture($captureData, $data['store_id']);
         } else {
-
+            // if invalid - reauthorize and capture
             $captureData = [
                 'amazon_order_reference_id' => $data['amazon_order_reference_id'],
                 'amount' => $data['capture_amount'],
@@ -54,7 +54,7 @@ class SettlementClient extends AbstractClient
                 'custom_information' => $data['custom_information'],
                 'platform_id' => $data['platform_id']
             ];
-            $response = $this->authorizeAndCapture($captureData, $data['store_id']);
+            $response = $this->authorize($data, true);
             $response['reauthorized'] = true;
         }
 
@@ -97,74 +97,6 @@ class SettlementClient extends AbstractClient
         return $response;
     }
 
-    /**
-     * @param $data
-     * @param $storeId
-     * @return array
-     * @throws AmazonServiceUnavailableException
-     */
-    private function authorizeAndCapture($data, $storeId)
-    {
-        $response = [];
-
-            $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
-
-            $authorizeData = [
-                'amazon_order_reference_id' => $data['amazon_order_reference_id'],
-                'authorization_amount' => $data['amount'],
-                'currency_code' => $data['currency_code'],
-                'authorization_reference_id' => $data['amazon_order_reference_id'] . '-A' . time(),
-                'capture_now' => true
-            ];
-
-            if ($authMode == 'synchronous') {
-                $authorizeData['transaction_timeout'] = 0;
-            }
-
-            $response['status'] = false;
-            $response['auth_mode'] = $authMode;
-            $response['amazon_order_reference_id'] = $data['amazon_order_reference_id'];
-
-            $detailResponse = $this->setOrderReferenceDetails($storeId, $data);
-
-            if ($detailResponse['status'] == 200) {
-                $confirmResponse = $this->confirmOrderReference($storeId, $data['amazon_order_reference_id']);
-
-                if ($confirmResponse->response['Status'] == 200) {
-                    $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
-
-                    if ($authorizeResponse) {
-                        $response['authorize_transaction_id'] = $authorizeResponse->getAuthorizeTransactionId();
-                        if ($authorizeResponse->getStatus()->getState() != 'Open') {
-                            $response['response_code'] = $authorizeResponse->getStatus()->getReasonCode();
-                        }
-                        else {
-                            $response['status'] = true;
-                        }
-
-                    }
-                }
-                else {
-                    $response['response_status'] = $confirmResponse->response['Status'];
-                    try {
-                        $xml = simplexml_load_string($confirmResponse->response['ResponseBody']);
-                        $code = $xml->Error->Code[0];
-                        if ($code) {
-                            $response['response_code'] = (string) $code;
-                        }
-
-                    }
-                    catch(\Exception $e) {
-                        $log['error'] = $e->getMessage();
-                        $this->logger->debug($log);
-                    }
-
-                }
-            }
-
-        return $response;
-    }
-
 
     /**
      * @param $data
@@ -190,7 +122,6 @@ class SettlementClient extends AbstractClient
             $this->logger->debug($log);
             throw new AmazonServiceUnavailableException();
         }
-
 
         return true;
     }

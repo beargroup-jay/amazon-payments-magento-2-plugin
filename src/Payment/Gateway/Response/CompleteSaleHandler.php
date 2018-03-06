@@ -79,8 +79,6 @@ class CompleteSaleHandler implements HandlerInterface
 
         $order = $this->subjectReader->getOrder();
 
-
-        // TODO check if item is async without transaction info and add to pending auth table.
         if ($response['status']) {
             $payment->setTransactionId($response['capture_transaction_id']);
             $payment->setParentTransactionId($response['authorize_transaction_id']);
