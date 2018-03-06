@@ -18,7 +18,6 @@ namespace Amazon\Payment\Gateway\Http\Client;
 
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
-use Amazon\Core\Helper\CategoryExclusion;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Payment\Domain\AmazonSetOrderDetailsResponseFactory;
@@ -50,10 +49,6 @@ abstract class AbstractClient implements ClientInterface
      */
     protected $clientFactory;
 
-    /**
-     * @var CategoryExclusion
-     */
-    private $categoryExclusion;
 
     /**
      * @var AmazonSetOrderDetailsResponseFactory
@@ -84,7 +79,6 @@ abstract class AbstractClient implements ClientInterface
      * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
      * @param AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory
      * @param AmazonCaptureResponseFactory $amazonCaptureResponseFactory
-     * @param CategoryExclusion $categoryExclusion
      * @param Data $coreHelper
      */
     public function __construct(
@@ -94,14 +88,12 @@ abstract class AbstractClient implements ClientInterface
         AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
         AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory,
         AmazonCaptureResponseFactory $amazonCaptureResponseFactory,
-        CategoryExclusion $categoryExclusion,
         Data $coreHelper
     )
     {
         $this->subjectReader = $subjectReader;
         $this->clientFactory = $clientFactory;
         $this->logger = $logger;
-        $this->categoryExclusion = $categoryExclusion;
         $this->amazonSetOrderDetailsResponseFactory = $amazonSetOrderDetailsResponseFactory;
         $this->amazonAuthorizationResponseFactory = $amazonAuthorizationResponseFactory;
         $this->coreHelper = $coreHelper;
@@ -138,17 +130,6 @@ abstract class AbstractClient implements ClientInterface
         return $response;
     }
 
-
-    /**
-     * @return bool
-     */
-    protected function checkForExcludedProducts()
-    {
-        if ($this->categoryExclusion->isQuoteDirty()) {
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Sets Amazon payment order data
@@ -206,11 +187,19 @@ abstract class AbstractClient implements ClientInterface
      * @return mixed
      */
     protected function getAuthorization($storeId, $data) {
-        $client = $this->clientFactory->create($storeId);
+        $response = null;
+        try {
+            $client = $this->clientFactory->create($storeId);
 
-        $responseParser       = $client->authorize($data);
-        $response             = $this->amazonAuthorizationResponseFactory->create(['response' => $responseParser]);
-        return $response->getDetails();
+            $responseParser = $client->authorize($data);
+            $response = $this->amazonAuthorizationResponseFactory->create(['response' => $responseParser]);
+        }
+        catch (\Exception $e) {
+            $log['error'] = $e->getMessage();
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
+        }
+        return $response ? $response->getDetails() : $response;
     }
 
     /**

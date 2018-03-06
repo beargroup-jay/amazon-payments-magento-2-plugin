@@ -31,44 +31,63 @@ class AuthorizeClient extends AbstractClient
     {
         $response = [];
 
-        if ($this->checkForExcludedProducts()) {
+        $storeId = $this->subjectReader->getStoreId();
 
-            $storeId = $this->subjectReader->getStoreId();
+        $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
 
-            $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
+        $authorizeData = [
+            'amazon_order_reference_id' => $data['amazon_order_reference_id'],
+            'authorization_amount' => $data['amount'],
+            'currency_code' => $data['currency_code'],
+            'authorization_reference_id' => $data['amazon_order_reference_id'] . '-A' . time(),
+            'capture_now' => false
+        ];
 
-            $authorizeData = [
-                'amazon_order_reference_id' => $data['amazon_order_reference_id'],
-                'authorization_amount' => $data['amount'],
-                'currency_code' => $data['currency_code'],
-                'authorization_reference_id' => $data['amazon_order_reference_id'].'-A'.time(),
-                'capture_now' => false
-            ];
+        if ($authMode == 'synchronous') {
+            $authorizeData['transaction_timeout'] = 0;
+        }
 
-            if ($authMode == 'synchronous') {
-                $authorizeData['transaction_timeout'] = 0;
-            }
+        $response['status'] = false;
+        $response['auth_mode'] = $authMode;
+        $response['amazon_order_reference_id'] = $data['amazon_order_reference_id'];
 
-            $response['status'] = false;
-            $response['auth_mode'] = $authMode;
-            $response['amazon_order_reference_id'] = $data['amazon_order_reference_id'];
+        $detailResponse = $this->setOrderReferenceDetails($storeId, $data);
 
-            $detailResponse = $this->setOrderReferenceDetails($storeId, $data);
+        if ($detailResponse['status'] == 200) {
+            $confirmResponse = $this->confirmOrderReference($storeId, $data['amazon_order_reference_id']);
 
-            if ($detailResponse['status'] == 200) {
-                $confirmResponse = $this->confirmOrderReference($storeId, $data['amazon_order_reference_id']);
+            if ($confirmResponse->response['Status'] == 200) {
+                $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
 
-                if ($confirmResponse->response['Status'] == 200) {
-                    $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
-
-                    if ($authorizeResponse) {
-                        $response['authorize_transaction_id'] = $authorizeResponse->getAuthorizeTransactionId();
-                        $response['status'] = true;
-
+                if ($authorizeResponse) {
+                    $response['authorize_transaction_id'] = $authorizeResponse->getAuthorizeTransactionId();
+                    if ($authorizeResponse->getStatus()->getState() != 'Open') {
+                        $response['response_code'] = $authorizeResponse->getStatus()->getReasonCode();
                     }
+                    else {
+                        $response['status'] = true;
+                    }
+
                 }
             }
+            else {
+                $response['response_status'] = $confirmResponse->response['Status'];
+                try {
+                    $xml = simplexml_load_string($confirmResponse->response['ResponseBody']);
+                    $code = $xml->Error->Code[0];
+                    if ($code) {
+                        $response['response_code'] = (string) $code;
+                    }
+
+                }
+                catch(\Exception $e) {
+                    $log['error'] = $e->getMessage();
+                    $this->logger->debug($log);
+                }
+
+            }
         }
+
 
         return $response;
     }

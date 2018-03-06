@@ -107,9 +107,6 @@ class SettlementClient extends AbstractClient
     {
         $response = [];
 
-        if ($this->checkForExcludedProducts()) {
-
-
             $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
 
             $authorizeData = [
@@ -137,14 +134,33 @@ class SettlementClient extends AbstractClient
                     $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
 
                     if ($authorizeResponse) {
-                        $response['capture_transaction_id'] = $authorizeResponse->getCaptureTransactionId();
                         $response['authorize_transaction_id'] = $authorizeResponse->getAuthorizeTransactionId();
-                        $response['status'] = true;
+                        if ($authorizeResponse->getStatus()->getState() != 'Open') {
+                            $response['response_code'] = $authorizeResponse->getStatus()->getReasonCode();
+                        }
+                        else {
+                            $response['status'] = true;
+                        }
 
                     }
                 }
+                else {
+                    $response['response_status'] = $confirmResponse->response['Status'];
+                    try {
+                        $xml = simplexml_load_string($confirmResponse->response['ResponseBody']);
+                        $code = $xml->Error->Code[0];
+                        if ($code) {
+                            $response['response_code'] = (string) $code;
+                        }
+
+                    }
+                    catch(\Exception $e) {
+                        $log['error'] = $e->getMessage();
+                        $this->logger->debug($log);
+                    }
+
+                }
             }
-        }
 
         return $response;
     }

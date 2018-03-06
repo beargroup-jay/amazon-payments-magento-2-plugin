@@ -88,10 +88,6 @@ class CaptureRequest implements BuilderInterface
 
         $order = $paymentDO->getOrder();
 
-        if ($this->coreHelper->getCurrencyCode() !== $order->getCurrencyCode()) {
-            throw new LocalizedException(__('The currency selected is not supported by Amazon Pay'));
-        }
-
         $quote = $this->subjectReader->getQuote();
 
         if (!$quote->getReservedOrderId()) {
