@@ -17,7 +17,7 @@
 namespace Amazon\Payment\Gateway\Validator;
 
 use Magento\Payment\Gateway\Validator\AbstractValidator;
-use Magento\Payment\Gateway\ConfigInterface;
+use Amazon\Payment\Gateway\Config\Config;
 use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
 use Amazon\Core\Helper\CategoryExclusion;
 
@@ -29,7 +29,7 @@ class ExcludedCategoryValidator extends AbstractValidator
 {
 
     /**
-     * @var \Magento\Payment\Gateway\ConfigInterface
+     * @var Config
      */
     private $config;
 
@@ -41,12 +41,12 @@ class ExcludedCategoryValidator extends AbstractValidator
     /**
      * ExcludedCategoryValidator constructor.
      * @param ResultInterfaceFactory $resultFactory
-     * @param ConfigInterface $config
+     * @param Config $config
      * @param CategoryExclusion $categoryExclusion
      */
     public function __construct(
         ResultInterfaceFactory $resultFactory,
-        ConfigInterface $config,
+        Config $config,
         CategoryExclusion $categoryExclusion
     )
     {

@@ -88,17 +88,27 @@
         </arguments>
     </type>
 
+    <virtualType name="AmazonAuthorizationValidators" type="Magento\Payment\Gateway\Validator\ValidatorComposite">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name ="category" xsi:type="string">Amazon\Payment\Gateway\Validator\ExcludedCategoryValidator</item>
+                <item name="contraints" xsi:type="string">Amazon\Payment\Gateway\Validator\ConstraintValidator</item>
+                <item name="authcodes" xsi:type="string">Amazon\Payment\Gateway\Validator\AuthorizationValidator</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+
     <!-- Authorize command -->
     <virtualType name="AmazonAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequest</argument>
             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\CompleteAuthHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
+            <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\AuthorizeClient</argument>
         </arguments>
     </virtualType>
-
 
     <type name="Amazon\Payment\Gateway\Request\AuthorizationRequest">
         <arguments>
@@ -112,7 +122,7 @@
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequest</argument>
             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\CompleteSaleHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
+            <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\CaptureClient</argument>
         </arguments>
     </virtualType>
@@ -123,7 +133,7 @@
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\SettlementRequest</argument>
             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\SettlementHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
+            <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\SettlementClient</argument>
         </arguments>
     </virtualType>
@@ -143,7 +153,7 @@
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\RefundRequest</argument>
             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\RefundHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\RefundClient</argument>
         </arguments>
     </virtualType>
@@ -154,7 +164,7 @@
             <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\VoidRequest</argument>
             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\VoidHandler</argument>
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\ResponseCodeValidator</argument>
+            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\VoidClient</argument>
         </arguments>
     </virtualType>

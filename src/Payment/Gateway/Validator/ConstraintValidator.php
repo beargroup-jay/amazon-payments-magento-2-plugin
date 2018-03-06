@@ -21,7 +21,7 @@ use Magento\Payment\Gateway\Validator\ResultInterface;
 use Amazon\Payment\Gateway\Http\Client\Client;
 use Amazon\Payment\Domain\AmazonConstraint;
 
-class ResponseCodeValidator extends AbstractValidator
+class ConstraintValidator extends AbstractValidator
 {
 
     /**
@@ -32,18 +32,15 @@ class ResponseCodeValidator extends AbstractValidator
      */
     public function validate(array $validationSubject)
     {
-        $allowedConstraints = [
-            AmazonConstraint::PAYMENT_PLAN_NOT_SET_ID,
-            AmazonConstraint::PAYMENT_METHOD_NOT_ALLOWED_ID
-        ];
+
 
         $response = $validationSubject['response'];
 
+        if (isset($response['constraints']) && $response['constraints']) {
         foreach ($response['constraints'] as $constraint) {
-            if (!in_array($constraint->getId(), $allowedConstraints)) {
                 return $this->createResult(
                     false,
-                    [__('Gateway rejected the transaction.')]
+                    [__('Gateway rejected the transaction. ').' '.$constraint->getDescription()]
                 );
 
             }

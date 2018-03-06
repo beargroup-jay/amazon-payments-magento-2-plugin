@@ -143,8 +143,13 @@ abstract class AbstractClient implements ClientInterface
 
         try {
             $responseParser = $this->clientFactory->create($storeId)->setOrderReferenceDetails($data);
+            $constraints = $this->amazonSetOrderDetailsResponseFactory->create([
+                'response' => $responseParser
+            ]);
+
             $response = [
-                'status' => $responseParser->response['Status']
+                'status' => $responseParser->response['Status'],
+                'constraints' => $constraints->getConstraints()
             ];
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
@@ -230,11 +235,17 @@ abstract class AbstractClient implements ClientInterface
 
         $response['status'] = false;
         $response['auth_mode'] = $authMode;
+        $response['constraints'] = [];
         $response['amazon_order_reference_id'] = $data['amazon_order_reference_id'];
 
         $detailResponse = $this->setOrderReferenceDetails($storeId, $data);
 
+        if (isset($detailResponse['constraints'])) {
+            $response['constraints'] = $detailResponse['constraints'];
+        }
+
         if ($detailResponse['status'] == 200) {
+
             $confirmResponse = $this->confirmOrderReference($storeId, $data['amazon_order_reference_id']);
 
             if ($confirmResponse->response['Status'] == 200) {
