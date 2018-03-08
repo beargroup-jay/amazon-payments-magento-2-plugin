@@ -72,13 +72,13 @@ class VoidHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (isset($response['status']) && $response['status'] != 200) {
+        if (isset($response['status']) && !$response['status']) {
             $this->messageManager->addErrorMessage(
-                'Unable to cancel the order or the Amazon Order ID is incorrect.'
+                __('Unable to cancel the order or the Amazon Order ID is incorrect.')
             );
         }
         else {
-            $this->messageManager->addSuccessMessage('Successfully cancelled order with Amazon Pay.');
+            $this->messageManager->addSuccessMessage(__('Successfully cancelled Amazon Payment.'));
         }
     }
 

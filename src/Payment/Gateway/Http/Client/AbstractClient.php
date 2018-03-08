@@ -36,6 +36,7 @@ use Amazon\Payment\Api\Data\PendingCaptureInterfaceFactory;
 abstract class AbstractClient implements ClientInterface
 {
 
+    const SUCCESS_CODES = ['Open', 'Closed', 'Completed'];
     /**
      * @var SubjectReader
      */
@@ -54,12 +55,12 @@ abstract class AbstractClient implements ClientInterface
     /**
      * @var PendingCaptureInterfaceFactory
      */
-    private $pendingCaptureFactory;
+    protected $pendingCaptureFactory;
 
     /**
      * @var PendingAuthorizationInterfaceFactory
      */
-    private $pendingAuthorizationFactory;
+    protected $pendingAuthorizationFactory;
 
 
     /**
@@ -273,6 +274,7 @@ abstract class AbstractClient implements ClientInterface
             $confirmResponse = $this->confirmOrderReference($storeId, $data['amazon_order_reference_id']);
 
             if ($confirmResponse->response['Status'] == 200) {
+
                 $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
 
                 if ($authorizeResponse) {
@@ -295,8 +297,7 @@ abstract class AbstractClient implements ClientInterface
                                 ->save();
                         }
                     }
-                    elseif ($authorizeResponse->getStatus()->getState() != 'Open'
-                        && $authorizeResponse->getStatus()->getState() != 'Closed') {
+                    elseif (!in_array($authorizeResponse->getStatus()->getState(), self::SUCCESS_CODES)) {
                         $response['response_code'] = $authorizeResponse->getStatus()->getReasonCode();
                     }
                     else {

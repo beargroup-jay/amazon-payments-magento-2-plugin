@@ -21,6 +21,7 @@ use Amazon\Core\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Magento\Framework\Message\ManagerInterface;
+use Amazon\Payment\Api\Data\PendingRefundInterfaceFactory;
 
 /**
  * Class RefundHandler
@@ -49,25 +50,33 @@ class RefundHandler implements HandlerInterface
      */
     private $coreHelper;
 
+    /**
+     * @var PendingRefundInterfaceFactory 
+     */
+    private $pendingRefundFactory;
+
 
     /**
      * RefundHandler constructor.
      * @param Logger $logger
      * @param SubjectReader $subjectReader
      * @param Data $coreHelper
-     * @param $messageManager
+     * @param ManagerInterface $messageManager
+     * @param PendingRefundInterfaceFactory $pendingRefundFactory
      */
     public function __construct(
         Logger $logger,
         SubjectReader $subjectReader,
         Data $coreHelper,
-        ManagerInterface $messageManager
+        ManagerInterface $messageManager,
+        PendingRefundInterfaceFactory $pendingRefundFactory
     )
     {
         $this->logger = $logger;
         $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;
         $this->messageManager = $messageManager;
+        $this->pendingRefundFactory = $pendingRefundFactory;
     }
 
     /**
@@ -76,13 +85,27 @@ class RefundHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (isset($response['status']) && $response['status'] != 200) {
+
+        if (isset($response['status']) && !$response['status']) {
             $this->messageManager->addErrorMessage(
-                'The refund amount or the Amazon Order ID is incorrect.'
+                __('The refund amount or the Amazon Order ID is incorrect.')
             );
-        }
-        else {
-            $this->messageManager->addSuccessMessage('Successfully sent refund for '.$handlingSubject['amount'].' amount to Amazon Pay');
+        } else {
+            $paymentDO = $this->subjectReader->readPayment($handlingSubject);
+
+            $payment = $paymentDO->getPayment();
+
+            $payment->setTransactionId($response['refund_id']);
+
+            if ($response['state'] == 'Pending') {
+                $this->pendingRefundFactory->create()
+                    ->setRefundId($response['refund_id'])
+                    ->setPaymentId($payment->getEntityId())
+                    ->setOrderId($payment->getOrder()->getId())
+                    ->save();
+            }
+
+            $this->messageManager->addSuccessMessage( __('Amazon Payment refund successful.'));
         }
     }
 

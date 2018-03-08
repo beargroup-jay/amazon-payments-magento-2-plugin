@@ -75,7 +75,7 @@ class AuthorizationValidator extends AbstractValidator
                         $errorMessage = __('Unable to authorize this transaction.');
                         break;
                     case 'PaymentMethodNotUpdated':
-                        $errorMessage = __('Buyer did not specifiy valid Amazon Wallet payment method.');
+                        $errorMessage = __('Buyer did not specify valid Amazon Wallet payment method.');
                         break;
                     case 'DuplicateReferenceId' :
                     case 'DuplicateRequest' :

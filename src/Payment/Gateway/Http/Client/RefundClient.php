@@ -16,14 +16,84 @@
 
 namespace Amazon\Payment\Gateway\Http\Client;
 
+use Magento\Payment\Gateway\Http\ClientInterface;
+use Magento\Payment\Gateway\Http\TransferInterface;
+use Magento\Payment\Model\Method\Logger;
+use Amazon\Core\Client\ClientFactoryInterface;
 use Amazon\Core\Exception\AmazonServiceUnavailableException;
+use Amazon\Payment\Domain\AmazonRefundResponseFactory;
 
 /**
  * Class RefundClient
  * @package Amazon\Payment\Gateway\Http\Client
  */
-class RefundClient extends AbstractClient
+class RefundClient implements ClientInterface
 {
+
+    const SUCCESS_CODES = ['Open', 'Closed', 'Completed', 'Pending'];
+
+    /**
+     * @var ClientFactoryInterface
+     */
+    private $clientFactory;
+
+    /**
+     * @var Logger
+     */
+    private $logger;
+
+
+    /**
+     * @var AmazonRefundResponseFactory
+     */
+    private $refundResponseFactory;
+
+    /**
+     * RefundClient constructor.
+     * @param Logger $logger
+     * @param ClientFactoryInterface $clientFactory
+     * @param AmazonRefundResponseFactory $refundResponseFactory
+     */
+    public function __construct(
+        Logger $logger,
+        ClientFactoryInterface $clientFactory,
+        AmazonRefundResponseFactory $refundResponseFactory
+    )
+    {
+        $this->refundResponseFactory = $refundResponseFactory;
+        $this->logger = $logger;
+        $this->clientFactory = $clientFactory;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function placeRequest(TransferInterface $transferObject)
+    {
+
+        $data = $transferObject->getBody();
+
+        $log = [
+            'request' => $transferObject->getBody(),
+            'client' => static::class
+        ];
+
+        $response = [];
+
+        try {
+            $response = $this->process($data);
+        } catch (\Exception $e) {
+            $message = __($e->getMessage() ?: "Something went wrong during Gateway request.");
+            $log['error'] = $message;
+            $this->logger->debug($log);
+            throw new AmazonServiceUnavailableException();
+        } finally {
+            $log['response'] = (array)$response;
+            $this->logger->debug($log);
+        }
+
+        return $response;
+    }
 
     /**
      * @inheritdoc
@@ -33,21 +103,32 @@ class RefundClient extends AbstractClient
         $store_id = $data['store_id'];
         unset($data['store_id']);
 
+        $response = [
+            'status' => false
+        ];
+
         try {
             $client = $this->clientFactory->create($store_id);
             $responseParser = $client->refund($data);
+            $refundResponse = $this->refundResponseFactory->create(['response' => $responseParser]);
+            $refund = $refundResponse->getDetails();
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
             $this->logger->debug($log);
             throw new AmazonServiceUnavailableException();
         }
 
+        $response['state'] = $refund->getRefundStatus()->getState();
+
+        if (in_array($refund->getRefundStatus()->getState(), self::SUCCESS_CODES)) {
+            $response['status'] = true;
+            $response['refund_id'] = $refund->getRefundId();
+        } else {
+            $response['response_code'] = $refund->getRefundStatus()->getReasonCode();
+        }
+
         // Gateway expects response to be in form of array
-        return [
-            'status' => $responseParser->response['Status'],
-            'constraints' => [],
-            'responseBody' => $responseParser->response['ResponseBody']
-        ];
+        return $response;
     }
 
 }

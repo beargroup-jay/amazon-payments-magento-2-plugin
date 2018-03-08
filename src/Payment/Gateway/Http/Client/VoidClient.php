@@ -25,8 +25,6 @@ use Amazon\Core\Exception\AmazonServiceUnavailableException;
 class VoidClient extends AbstractClient
 {
 
-
-
     /**
      * @inheritdoc
      */
@@ -35,21 +33,25 @@ class VoidClient extends AbstractClient
         $store_id = $data['store_id'];
         unset($data['store_id']);
 
+        $response = [
+          'status' => false
+        ];
+
         try {
             $client = $this->clientFactory->create($store_id);
             $responseParser = $client->cancelOrderReference($data);
 
-            // Gateway expects response to be in form of array
-            return [
-                'status' => $responseParser->response['Status'],
-                'constraints' => [],
-                'responseBody' => $responseParser->response['ResponseBody']
-            ];
+            if ($responseParser->response['Status'] == 200) {
+                // Gateway expects response to be in form of array
+                $response['status'] = true;
+            }
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
             $this->logger->debug($log);
             throw new AmazonServiceUnavailableException();
         }
+
+        return $response;
     }
 
 }

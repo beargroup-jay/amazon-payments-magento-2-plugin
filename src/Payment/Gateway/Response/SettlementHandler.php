@@ -81,34 +81,24 @@ class SettlementHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        if (!isset($handlingSubject['payment'])
-            || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
-        ) {
-            throw new \InvalidArgumentException('Payment data object should be provided');
-        }
-
-        $paymentDO = $handlingSubject['payment'];
+        $paymentDO = $this->subjectReader->readPayment($handlingSubject);
 
         $payment = $paymentDO->getPayment();
-
-        $orderDO = $paymentDO->getOrder();
-
-        $order = $this->orderRepository->get($orderDO->getId());
-
-        $quote = $this->quoteRepository->get($order->getQuoteId());
-
-        $quoteLink = $this->subjectReader->getQuoteLink($quote->getId());
 
         // if reauthorized, treat as end of auth + capture process
         if ($response['reauthorized']) {
 
-            // TODO check if item is async without transaction info and add to pending auth table.
             if ($response['status']) {
+
+                $orderDO = $paymentDO->getOrder();
+                $order = $this->orderRepository->get($orderDO->getId());
+
                 $payment->setTransactionId($response['capture_transaction_id']);
                 $payment->setParentTransactionId($response['authorize_transaction_id']);
                 $payment->setIsTransactionClosed(true);
 
-                $quoteLink = $this->subjectReader->getQuoteLink();
+                $quote = $this->quoteRepository->get($order->getQuoteId());
+                $quoteLink = $this->subjectReader->getQuoteLink($quote->getId());
                 $quoteLink->setConfirmed(true)->save();
 
                 $message = __('Captured amount of %1 online', $order->getGrandTotal());

@@ -60,25 +60,19 @@ class CompleteAuthHandler implements HandlerInterface
     /**
      * @param array $handlingSubject
      * @param array $response
+     * @throws \Exception
      */
     public function handle(array $handlingSubject, array $response)
     {
 
-            if (!isset($handlingSubject['payment'])
-                || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
-            ) {
-                throw new \InvalidArgumentException('Payment data object should be provided');
-            }
-            $paymentDO = $handlingSubject['payment'];
+        $paymentDO = $this->subjectReader->readPayment($handlingSubject);
 
-            $amazonId = $this->subjectReader->getAmazonId();
+        $amazonId = $this->subjectReader->getAmazonId();
 
-            $payment = $paymentDO->getPayment();
+        $payment = $paymentDO->getPayment();
 
-            $order = $this->subjectReader->getOrder();
+        $order = $this->subjectReader->getOrder();
 
-
-        // TODO check if item is async without transaction info and add to pending auth table.
         if ($response['status']) {
             $payment->setTransactionId($response['authorize_transaction_id']);
             $payment->setIsTransactionClosed(false);

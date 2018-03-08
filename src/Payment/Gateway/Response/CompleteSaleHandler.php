@@ -65,13 +65,7 @@ class CompleteSaleHandler implements HandlerInterface
     public function handle(array $handlingSubject, array $response)
     {
 
-            if (!isset($handlingSubject['payment'])
-                || !$handlingSubject['payment'] instanceof PaymentDataObjectInterface
-            ) {
-                throw new \InvalidArgumentException('Payment data object should be provided');
-            }
-
-        $paymentDO = $handlingSubject['payment'];
+        $paymentDO = $this->subjectReader->readPayment($handlingSubject);
 
         $amazonId = $this->subjectReader->getAmazonId();
 

@@ -69,25 +69,35 @@ class SettlementClient extends AbstractClient
      */
     private function completeCapture($data, $storeId)
     {
-        $response = [];
+        $response = [
+            'status' => false
+        ];
 
         try {
             $responseParser = $this->clientFactory->create($storeId)->capture($data);
             if ($responseParser->response['Status'] == 200) {
                 $captureResponse = $this->amazonCaptureResponseFactory->create(['response' => $responseParser]);
-                    $capture = $captureResponse->getDetails();
-                // TODO check status against Amazon\Payment\Domain\Validator\AmazonCapture validation
+                $capture = $captureResponse->getDetails();
 
-                $response = [
-                    'status' => true,
-                    'transaction_id' => $capture->getTransactionId(),
-                    'reauthorized' => false
-                ];
+                if (in_array($capture->getStatus()->getState(), self::SUCCESS_CODES)) {
+                    $response = [
+                        'status' => true,
+                        'transaction_id' => $capture->getTransactionId(),
+                        'reauthorized' => false
+                    ];
+                } elseif ($capture->getStatus()->getState() == 'Pending') {
+                    $order = $this->subjectReader->getOrder();
+
+                    $this->pendingCaptureFactory->create()
+                        ->setCaptureId($capture->getTransactionId())
+                        ->setOrderId($order->getId())
+                        ->setPaymentId($order->getPayment()->getEntityId())
+                        ->save();
+                } else {
+                    $response['response_code'] = $capture->getReasonCode();
+                }
             }
-            else {
-                // TODO: better handle a capture operation that has already succeeded.
-                throw new AmazonServiceUnavailableException();
-            }
+
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
             $this->logger->debug($log);
