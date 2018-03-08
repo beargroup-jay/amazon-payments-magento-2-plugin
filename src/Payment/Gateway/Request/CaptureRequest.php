@@ -16,7 +16,7 @@
 namespace Amazon\Payment\Gateway\Request;
 
 use Amazon\Payment\Gateway\Config\Config;
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Amazon\Payment\Plugin\AdditionalInformation;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\SubjectReader;
@@ -114,6 +114,31 @@ class CaptureRequest implements BuilderInterface
                     'Plugin Version : ' . $this->coreHelper->getVersion(),
                 'platform_id' => $this->config::PLATFORM_ID
             ];
+        }
+
+        if ($this->coreHelper->isSandboxEnabled('store', $quote->getStoreId())) {
+
+            $payment = $paymentDO->getPayment();
+
+            $data['additional_information'] = $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
+
+            $eventData = [
+                'amazon_order_reference_id'  => $amazonId,
+                'authorization_amount'       => $buildSubject['amount'],
+                'currency_code'              => $order->getCurrencyCode(),
+                'authorization_reference_id' => $amazonId . '-C' . time(),
+                'capture_now'                => true,
+            ];
+
+            $transport = new DataObject($eventData);
+            $this->eventManager->dispatch(
+                'amazon_payment_authorize_before',
+                [
+                    'context'   => 'authorization',
+                    'payment'   => $paymentDO->getPayment(),
+                    'transport' => $transport
+                ]
+            );
         }
 
         return $data;

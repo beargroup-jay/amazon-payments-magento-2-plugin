@@ -16,11 +16,13 @@
 namespace Amazon\Payment\Gateway\Request;
 
 use Magento\Payment\Gateway\ConfigInterface;
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Framework\App\ProductMetadata;
 use Amazon\Payment\Gateway\Helper\SubjectReader;
 use Amazon\Core\Helper\Data;
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\DataObject;
+use Amazon\Payment\Plugin\AdditionalInformation;
 
 class AuthorizationRequest implements BuilderInterface
 {
@@ -45,23 +47,31 @@ class AuthorizationRequest implements BuilderInterface
     private $coreHelper;
 
     /**
+     * @var ManagerInterface
+     */
+    private $eventManager;
+
+    /**
      * AuthorizationRequest constructor.
      * @param ConfigInterface $config
      * @param ProductMetadata $productMetadata
      * @param SubjectReader $subjectReader
      * @param Data $coreHelper
+     * @param ManagerInterface $eventManager
      */
     public function __construct(
         ConfigInterface $config,
         ProductMetaData $productMetadata,
         SubjectReader $subjectReader,
-        Data $coreHelper
+        Data $coreHelper,
+        ManagerInterface $eventManager
     )
     {
         $this->config = $config;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->subjectReader = $subjectReader;
+        $this->eventManager = $eventManager;
     }
     /**
      * Builds ENV request
@@ -104,6 +114,31 @@ class AuthorizationRequest implements BuilderInterface
                 'platform_id' => $this->config::PLATFORM_ID,
                 'request_payment_authorization' => true
             ];
+        }
+
+        if ($this->coreHelper->isSandboxEnabled('store', $quote->getStoreId())) {
+
+            $payment = $paymentDO->getPayment();
+
+            $data['additional_information'] = $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
+
+            $eventData = [
+                'amazon_order_reference_id'  => $amazonId,
+                'authorization_amount'       => $buildSubject['amount'],
+                'currency_code'              => $order->getCurrencyCode(),
+                'authorization_reference_id' => $amazonId . '-A' . time(),
+                'capture_now'                => false,
+            ];
+
+            $transport = new DataObject($eventData);
+            $this->eventManager->dispatch(
+                'amazon_payment_authorize_before',
+                [
+                    'context'   => 'authorization',
+                    'payment'   => $paymentDO->getPayment(),
+                    'transport' => $transport
+                ]
+            );
         }
 
         return $data;

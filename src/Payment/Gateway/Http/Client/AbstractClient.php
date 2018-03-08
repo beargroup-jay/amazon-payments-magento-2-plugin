@@ -221,6 +221,12 @@ abstract class AbstractClient implements ClientInterface
 
         $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
 
+        isset($data['additional_information']) ? $additionalInformation = $data['additional_information'] : $additionalInformation = '';
+
+        if ($additionalInformation) {
+            unset($data['additional_information']);
+        }
+
         $authorizeData = [
             'amazon_order_reference_id' => $data['amazon_order_reference_id'],
             'authorization_amount' => $data['amount'],
@@ -286,6 +292,9 @@ abstract class AbstractClient implements ClientInterface
             }
         }
 
+        if ($additionalInformation) {
+            $response['sandbox'] = $additionalInformation;
+        }
 
         return $response;
     }
