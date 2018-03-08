@@ -134,7 +134,7 @@ class CaptureRequest implements BuilderInterface
             $this->eventManager->dispatch(
                 'amazon_payment_authorize_before',
                 [
-                    'context'   => 'authorization',
+                    'context'   => 'capture',
                     'payment'   => $paymentDO->getPayment(),
                     'transport' => $transport
                 ]

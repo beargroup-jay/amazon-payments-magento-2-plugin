@@ -26,6 +26,8 @@ use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Amazon\Core\Helper\Data;
 use Amazon\Payment\Domain\AmazonAuthorizationResponseFactory;
 use Amazon\Payment\Domain\AmazonCaptureResponseFactory;
+use Amazon\Payment\Api\Data\PendingAuthorizationInterfaceFactory;
+use Amazon\Payment\Api\Data\PendingCaptureInterfaceFactory;
 
 /**
  * Class AbstractClient
@@ -48,6 +50,16 @@ abstract class AbstractClient implements ClientInterface
      * @var ClientFactoryInterface
      */
     protected $clientFactory;
+
+    /**
+     * @var PendingCaptureInterfaceFactory
+     */
+    private $pendingCaptureFactory;
+
+    /**
+     * @var PendingAuthorizationInterfaceFactory
+     */
+    private $pendingAuthorizationFactory;
 
 
     /**
@@ -79,6 +91,8 @@ abstract class AbstractClient implements ClientInterface
      * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
      * @param AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory
      * @param AmazonCaptureResponseFactory $amazonCaptureResponseFactory
+     * @param PendingCaptureInterfaceFactory $pendingCaptureFactory
+     * @param PendingAuthorizationInterfaceFactory $pendingAuthorizationFactory
      * @param Data $coreHelper
      */
     public function __construct(
@@ -88,6 +102,8 @@ abstract class AbstractClient implements ClientInterface
         AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory,
         AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory,
         AmazonCaptureResponseFactory $amazonCaptureResponseFactory,
+        PendingCaptureInterfaceFactory $pendingCaptureFactory,
+        PendingAuthorizationInterfaceFactory $pendingAuthorizationFactory,
         Data $coreHelper
     )
     {
@@ -98,6 +114,8 @@ abstract class AbstractClient implements ClientInterface
         $this->amazonAuthorizationResponseFactory = $amazonAuthorizationResponseFactory;
         $this->coreHelper = $coreHelper;
         $this->amazonCaptureResponseFactory = $amazonCaptureResponseFactory;
+        $this->pendingAuthorizationFactory = $pendingAuthorizationFactory;
+        $this->pendingCaptureFactory = $pendingCaptureFactory;
     }
 
     /**
@@ -221,7 +239,7 @@ abstract class AbstractClient implements ClientInterface
 
         $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
 
-        isset($data['additional_information']) ? $additionalInformation = $data['additional_information'] : $additionalInformation = '';
+        (isset($data['additional_information']) && $data['additional_information'] != 'default') ? $additionalInformation = $data['additional_information'] : $additionalInformation = '';
 
         if ($additionalInformation) {
             unset($data['additional_information']);
@@ -258,9 +276,26 @@ abstract class AbstractClient implements ClientInterface
                 $authorizeResponse = $this->getAuthorization($storeId, $authorizeData);
 
                 if ($authorizeResponse) {
-                    // TODO add pending state
                     $response['authorize_transaction_id'] = $authorizeResponse->getAuthorizeTransactionId();
-                    if ($authorizeResponse->getStatus()->getState() != 'Open'
+
+                    if ($authorizeResponse->getStatus()->getState() == 'Pending') {
+                        $order = $this->subjectReader->getOrder();
+                        if ($captureNow) {
+                            $this->pendingCaptureFactory->create()
+                                ->setCaptureId($authorizeResponse->getCaptureTransactionId())
+                                ->setOrderId($order->getId())
+                                ->setPaymentId($order->getPayment()->getEntityId())
+                                ->save();
+                        }
+                        else {
+                            $this->pendingAuthorizationFactory->create()
+                                ->setOrderId($order->getId())
+                                ->setPaymentId($order->getPayment()->getEntityId())
+                                ->setAuthorizationId($authorizeResponse->getAuthorizeTransactionId())
+                                ->save();
+                        }
+                    }
+                    elseif ($authorizeResponse->getStatus()->getState() != 'Open'
                         && $authorizeResponse->getStatus()->getState() != 'Closed') {
                         $response['response_code'] = $authorizeResponse->getStatus()->getReasonCode();
                     }
@@ -271,7 +306,6 @@ abstract class AbstractClient implements ClientInterface
                             $response['capture_transaction_id'] = $authorizeResponse->getCaptureTransactionId();
                         }
                     }
-
                 }
             }
             else {

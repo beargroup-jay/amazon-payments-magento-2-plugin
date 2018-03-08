@@ -85,6 +85,8 @@ class AuthorizationRequest implements BuilderInterface
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
 
+        $payment = $paymentDO->getPayment();
+
         $order = $paymentDO->getOrder();
 
         $quote = $this->subjectReader->getQuote();
@@ -117,8 +119,6 @@ class AuthorizationRequest implements BuilderInterface
         }
 
         if ($this->coreHelper->isSandboxEnabled('store', $quote->getStoreId())) {
-
-            $payment = $paymentDO->getPayment();
 
             $data['additional_information'] = $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
 
