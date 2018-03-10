@@ -25,28 +25,22 @@ class CheckoutController
     /**
      * @var Session
      */
-    protected $session;
+    private $session;
 
     /**
      * @var UrlInterface
      */
-    protected $url;
+    private $url;
 
-
-    /**
-     * @var Data
-     */
-    private $coreHelper;
-
-    public function __construct(Session $session, UrlInterface $url, \Amazon\Core\Helper\Data $coreHelper)
+    public function __construct(Session $session, UrlInterface $url)
     {
         $this->session = $session;
         $this->url     = $url;
-
-        $this->coreHelper = $coreHelper;
-        $this->coreHelper->updateCurrentUrl($url->getCurrentUrl());
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function afterExecute(Index $index, ResultInterface $result)
     {
         $this->session->setAfterAmazonAuthUrl($this->url->getUrl('checkout'));

@@ -120,7 +120,8 @@ class CaptureRequest implements BuilderInterface
 
             $payment = $paymentDO->getPayment();
 
-            $data['additional_information'] = $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
+            $data['additional_information'] =
+                $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
 
             $eventData = [
                 'amazon_order_reference_id'  => $amazonId,

@@ -33,7 +33,7 @@ class Data extends AbstractHelper
     const AMAZON_REGION = 'region';
     const AMAZON_SANDBOX = 'sandbox';
 
-    protected $amazonAccountUrl
+    private $amazonAccountUrl
         = [
             'us' => 'https://payments.amazon.com/overview',
             'uk' => 'https://payments.amazon.co.uk/overview',
@@ -44,7 +44,7 @@ class Data extends AbstractHelper
     /**
      * @var Array
      */
-    protected $amazonCredentialsFields
+    private $amazonCredentialsFields
         = [
             self::AMAZON_SECRET_KEY,
             self::AMAZON_ACCESS_KEY,
@@ -56,7 +56,7 @@ class Data extends AbstractHelper
     /**
      * @var Array
      */
-    protected $amazonCredentialsEncryptedFields
+    private $amazonCredentialsEncryptedFields
         = [
             self::AMAZON_SECRET_KEY,
             self::AMAZON_CLIENT_SECRET
@@ -65,12 +65,12 @@ class Data extends AbstractHelper
     /**
      * @var EncryptorInterface
      */
-    protected $encryptor;
+    private $encryptor;
 
     /**
      * @var StoreManagerInterface
      */
-    protected $storeManager;
+    private $storeManager;
 
     /**
      * @var \Amazon\Core\Helper\ClientIp
@@ -80,7 +80,7 @@ class Data extends AbstractHelper
     /**
      * @var ModuleListInterface
      */
-    protected $moduleList;
+    private $moduleList;
 
     /**
      * @var SessionManagerInterface
@@ -227,7 +227,8 @@ class Data extends AbstractHelper
             'de' => 'https://static-eu.payments-amazon.com/OffAmazonPayments/de/lpa/js/Widgets.js?nomin',
             'uk' => 'https://static-eu.payments-amazon.com/OffAmazonPayments/uk/lpa/js/Widgets.js?nomin',
             'us' => 'https://static-na.payments-amazon.com/OffAmazonPayments/us/js/Widgets.js?nomin',
-            'jp' => 'https://origin-na.ssl-images-amazon.com/images/G/09/EP/offAmazonPayments/sandbox/prod/lpa/js/Widgets.js?nomin',
+            'jp' => 'https://origin-na.ssl-images-amazon.com/images/G/09/EP/offAmazonPayments/sandbox/prod' .
+                '/lpa/js/Widgets.js?nomin',
         ];
 
         if ($sandboxEnabled) {
@@ -235,7 +236,8 @@ class Data extends AbstractHelper
                 'de' => 'https://static-eu.payments-amazon.com/OffAmazonPayments/de/sandbox/lpa/js/Widgets.js?nomin',
                 'uk' => 'https://static-eu.payments-amazon.com/OffAmazonPayments/uk/sandbox/lpa/js/Widgets.js?nomin',
                 'us' => 'https://static-na.payments-amazon.com/OffAmazonPayments/us/sandbox/js/Widgets.js?nomin',
-                'jp' => 'https://origin-na.ssl-images-amazon.com/images/G/09/EP/offAmazonPayments/sandbox/prod/lpa/js/Widgets.js?nomin',
+                'jp' => 'https://origin-na.ssl-images-amazon.com/images/G/09/EP/offAmazonPayments/sandbox/prod/lpa/js' .
+                    '/Widgets.js?nomin',
             ];
         }
 
@@ -319,6 +321,14 @@ class Data extends AbstractHelper
             $scope,
             $scopeCode
         );
+    }
+
+    /*
+     * @return bool
+     */
+    public function isEnabled($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    {
+        return $this->isLwaEnabled($scope, $scopeCode) || $this->isPwaEnabled($scope, $scopeCode);
     }
 
     /*
@@ -530,7 +540,8 @@ class Data extends AbstractHelper
 
         if (in_array($context, ['authorization', 'authorization_capture'])) {
             $simulationStrings['Authorization:Declined:InvalidPaymentMethod']
-                = '{"SandboxSimulation": {"State":"Declined", "ReasonCode":"InvalidPaymentMethod", "PaymentMethodUpdateTimeInMins":5}}';
+                = '{"SandboxSimulation": {"State":"Declined", "ReasonCode":"InvalidPaymentMethod", ' .
+                  '"PaymentMethodUpdateTimeInMins":5}}';
             $simulationStrings['Authorization:Declined:AmazonRejected']
                 = '{"SandboxSimulation": {"State":"Declined", "ReasonCode":"AmazonRejected"}}';
             $simulationStrings['Authorization:Declined:TransactionTimedOut']

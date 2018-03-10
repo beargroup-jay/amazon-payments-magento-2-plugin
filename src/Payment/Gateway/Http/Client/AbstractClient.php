@@ -240,7 +240,8 @@ abstract class AbstractClient implements ClientInterface
 
         $authMode = $this->coreHelper->getAuthorizationMode('store', $storeId);
 
-        (isset($data['additional_information']) && $data['additional_information'] != 'default') ? $additionalInformation = $data['additional_information'] : $additionalInformation = '';
+        (isset($data['additional_information']) && $data['additional_information'] != 'default')
+            ? $additionalInformation = $data['additional_information'] : $additionalInformation = '';
 
         if ($additionalInformation) {
             unset($data['additional_information']);

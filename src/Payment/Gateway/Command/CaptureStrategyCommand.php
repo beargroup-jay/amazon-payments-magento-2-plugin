@@ -161,7 +161,7 @@ class CaptureStrategyCommand implements CommandInterface
     {
 
         $filters[] = $this->filterBuilder->setField('payment_id')
-            ->setValue($payment->getId())
+            ->setValue($payment->getEntityId())
             ->create();
 
         $filters[] = $this->filterBuilder->setField('txn_type')

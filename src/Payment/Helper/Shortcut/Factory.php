@@ -21,17 +21,17 @@ class Factory
     /**
      * Default validator
      */
-    const DEFAULT_VALIDATOR = 'Amazon\Payment\Helper\Shortcut\Validator';
+    const DEFAULT_VALIDATOR = \Amazon\Payment\Helper\Shortcut\Validator::class;
 
     /**
      * Checkout validator
      */
-    const CHECKOUT_VALIDATOR = 'Amazon\Payment\Helper\Shortcut\CheckoutValidator';
+    const CHECKOUT_VALIDATOR = \Amazon\Payment\Helper\Shortcut\CheckoutValidator::class;
 
     /**
      * @var \Magento\Framework\ObjectManagerInterface
      */
-    protected $_objectManager;
+    private $_objectManager;
 
     /**
      * @param \Magento\Framework\ObjectManagerInterface $objectManager
@@ -54,3 +54,4 @@ class Factory
         return $this->_objectManager->create($instanceName);
     }
 }
+

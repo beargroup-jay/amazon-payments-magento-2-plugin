@@ -15,6 +15,8 @@
  */
 namespace Amazon\Core\Domain;
 
+use Amazon\Core\Api\Data\AmazonCustomerInterface;
+use Amazon\Core\Api\Data\AmazonNameInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
@@ -24,49 +26,39 @@ class AmazonCustomerFactory
     /**
      * @var ObjectManagerInterface
      */
-    protected $objectManager = null;
+    private $objectManager = null;
 
     /**
-     * @var array
+     * @var AmazonName
      */
-    protected $perCountryCustomerHandlers;
+    private $amazonName;
+
+    /**
+     * @var AmazonNameFactory
+     */
+    private $amazonNameFactory;
 
     /**
      * @param ObjectManagerInterface $objectManager
-     * @param array $perCountryCustomerHandlers Per-country custom handlers of incoming name data.
-     *                                         The key as an "ISO 3166-1 alpha-2" country code and
-     *                                         the value as an FQCN of a child of AmazonAddress.
      */
     public function __construct(
         ObjectManagerInterface $objectManager,
-        array $perCountryCustomerHandlers = []
+        AmazonNameFactory $amazonNameFactory
     ) {
-        $this->objectManager = $objectManager;
-        $this->perCountryCustomerHandlers = array_change_key_case($perCountryCustomerHandlers, CASE_UPPER);
+        $this->objectManager  = $objectManager;
+        $this->amazonNameFactory = $amazonNameFactory;
     }
 
     /**
      * @param array $data
-     * @return AmazonName
-     * @throws LocalizedException
+     * @return AmazonCustomer
      */
     public function create(array $data = [])
     {
-        $instanceClassName = AmazonCustomer::class;
-        $countryCode = strtoupper($data['country']);
-
-        if (!empty($this->perCountryCustomerHandlers[$countryCode])) {
-            $instanceClassName = (string) $this->perCountryCustomerHandlers[$countryCode];
-        }
-
-        $instance = $this->objectManager->create($instanceClassName, $data);
-
-        if (!$instance instanceof AmazonCustomer) {
-            throw new LocalizedException(
-                __('Customer country handler %1 must be of type %2', [$instanceClassName, AmazonCustomer::class])
-            );
-        }
-
-        return $instance;
+        $amazonName = $this->amazonNameFactory
+            ->create(['name' => $data['name'], 'country' => $data['country']]);
+        $data[AmazonNameInterface::FIRST_NAME] = $amazonName->getFirstName();
+        $data[AmazonNameInterface::LAST_NAME] = $amazonName->getLastName();
+        return $this->objectManager->create(AmazonCustomer::class, ['data' => $data]);
     }
 }

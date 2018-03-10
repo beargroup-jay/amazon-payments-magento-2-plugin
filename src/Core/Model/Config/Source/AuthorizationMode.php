@@ -30,7 +30,6 @@ class AuthorizationMode implements ArrayInterface
     {
         return [
             ['value' => static::SYNC, 'label' => __('Immediate')],
-//            ['value' => static::ASYNC, 'label' => __('Asynchronous')],
             ['value' => static::SYNC_THEN_ASYNC, 'label' => __('Automatic')]
         ];
     }

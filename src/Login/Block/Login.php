@@ -19,18 +19,20 @@ use Amazon\Core\Helper\Data;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 
+/**
+ * @api
+ */
 class Login extends Template
 {
     /**
      * @var Data
      */
-    protected $coreHelper;
+    private $coreHelper;
 
     public function __construct(Context $context, Data $coreHelper)
     {
         $this->coreHelper = $coreHelper;
         parent::__construct($context);
-        $this->coreHelper->updateCurrentUrl($context->getUrlBuilder()->getCurrentUrl());
     }
 
     protected function _toHtml()

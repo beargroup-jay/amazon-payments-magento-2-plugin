@@ -29,6 +29,8 @@ use Magento\Framework\App\Request\Http;
 
 /**
  * Class Button
+ *
+ * @api
  */
 class Button extends Template implements ShortcutInterface
 {
@@ -66,11 +68,10 @@ class Button extends Template implements ShortcutInterface
      */
     private $coreHelper;
 
-    /*
+    /**
      * @var Http
      */
     private $request;
-
 
     /**
      * Button constructor.
@@ -110,6 +111,10 @@ class Button extends Template implements ShortcutInterface
      */
     protected function shouldRender()
     {
+        if ($this->getIsCart() && $this->payment->getValue('active', $this->session->getQuote()->getStoreId())) {
+            return true;
+        }
+
         return $this->coreHelper->isPayButtonAvailableInMinicart()
             && $this->payment->getValue('active', $this->session->getQuote()->getStoreId())
             && $this->isMiniCart;
@@ -127,7 +132,8 @@ class Button extends Template implements ShortcutInterface
         return parent::_toHtml();
     }
 
-    protected function _isOnCartPage(){
+    protected function _isOnCartPage()
+    {
         return $this->request->getFullActionName() == 'checkout_cart_index';
     }
 

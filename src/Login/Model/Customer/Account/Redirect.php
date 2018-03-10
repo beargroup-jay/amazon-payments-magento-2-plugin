@@ -32,13 +32,12 @@ class Redirect extends BaseRedirect
     /**
      * @var CheckoutSession
      */
-    protected $checkoutSession;
+    private $checkoutSession;
 
     /**
      * @var CustomerSession
      */
-    protected $customerSession;
-
+    private $customerSession;
     /**
      * @var Data
      */
@@ -54,7 +53,7 @@ class Redirect extends BaseRedirect
         CustomerUrl $customerUrl,
         ResultFactory $resultFactory,
         CheckoutSession $checkoutSession,
-        \Amazon\Core\Helper\Data $coreHelper
+        Data $coreHelper
     ) {
         parent::__construct(
             $request,
@@ -84,10 +83,10 @@ class Redirect extends BaseRedirect
         else {
             $afterAmazonAuthUrl = $this->customerUrl->getAccountUrl();
 
-            if ($this->checkoutSession->getQuote() && (int)$this->checkoutSession->getQuote()->getItemsCount() > 0) {
-                $afterAmazonAuthUrl = $this->url->getUrl('checkout');
-            } elseif ($this->customerSession->getAfterAmazonAuthUrl()) {
-                $afterAmazonAuthUrl = $this->customerSession->getAfterAmazonAuthUrl();
+        if ($this->checkoutSession->getQuote() && (int)$this->checkoutSession->getQuote()->getItemsCount() > 0) {
+            $afterAmazonAuthUrl = $this->url->getUrl('checkout');
+        } elseif ($this->customerSession->getAfterAmazonAuthUrl()) {
+            $afterAmazonAuthUrl = $this->customerSession->getAfterAmazonAuthUrl();
             }
         }
 

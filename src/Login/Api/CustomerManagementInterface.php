@@ -13,21 +13,18 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Core\Domain;
+namespace Amazon\Login\Api;
 
-class AmazonNameJp extends AmazonName
+/**
+ * @api
+ */
+interface CustomerManagementInterface
 {
-
     /**
-     * AmazonName constructor.
+     * Add amazon id extension attribute to customer
      *
-     * @param string $name
+     * @param CustomerInterface $customer
+     * @return void
      */
-    public function __construct($name)
-    {
-        $name      = mb_convert_kana($name, 's', 'utf-8');
-        $nameParts       = explode(' ', trim($name), 2);
-        $this->firstName = isset($nameParts[1]) ? $nameParts[1] : '.';
-        $this->lastName  = $nameParts[0];
-    }
+    public function setAmazonIdExtensionAttribute(\Magento\Customer\Api\Data\CustomerInterface $customer);
 }

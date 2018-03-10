@@ -120,7 +120,8 @@ class AuthorizationRequest implements BuilderInterface
 
         if ($this->coreHelper->isSandboxEnabled('store', $quote->getStoreId())) {
 
-            $data['additional_information'] = $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
+            $data['additional_information'] =
+                $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
 
             $eventData = [
                 'amazon_order_reference_id'  => $amazonId,

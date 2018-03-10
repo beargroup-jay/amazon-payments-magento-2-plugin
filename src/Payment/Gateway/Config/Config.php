@@ -5,9 +5,6 @@
  */
 namespace Amazon\Payment\Gateway\Config;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
-
 class Config extends \Magento\Payment\Gateway\Config\Config
 {
     const CODE = 'amazon_payment';
