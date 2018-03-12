@@ -159,20 +159,27 @@ class CaptureStrategyCommand implements CommandInterface
      */
     private function captureTransactionExists(OrderPaymentInterface $payment)
     {
+        $this->searchCriteriaBuilder->addFilters(
+            [
+                $this->filterBuilder
+                    ->setField('payment_id')
+                    ->setValue($payment->getId())
+                    ->create(),
+            ]
+        );
 
-        $filters[] = $this->filterBuilder->setField('payment_id')
-            ->setValue($payment->getEntityId())
-            ->create();
+        $this->searchCriteriaBuilder->addFilters(
+            [
+                $this->filterBuilder
+                    ->setField('txn_type')
+                    ->setValue(TransactionInterface::TYPE_CAPTURE)
+                    ->create(),
+            ]
+        );
 
-        $filters[] = $this->filterBuilder->setField('txn_type')
-            ->setValue(TransactionInterface::TYPE_CAPTURE)
-            ->create();
-
-        $searchCriteria = $this->searchCriteriaBuilder->addFilters($filters)
-            ->create();
+        $searchCriteria = $this->searchCriteriaBuilder->create();
 
         $count = $this->transactionRepository->getList($searchCriteria)->getTotalCount();
-
         return (boolean) $count;
     }
 }
