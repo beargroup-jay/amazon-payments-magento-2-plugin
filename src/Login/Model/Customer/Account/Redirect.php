@@ -25,7 +25,6 @@ use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Url\DecoderInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Amazon\Core\Helper\Data;
 
 class Redirect extends BaseRedirect
 {
@@ -38,10 +37,6 @@ class Redirect extends BaseRedirect
      * @var CustomerSession
      */
     private $customerSession;
-    /**
-     * @var Data
-     */
-    private $coreHelper;
 
     public function __construct(
         RequestInterface $request,
@@ -52,8 +47,7 @@ class Redirect extends BaseRedirect
         DecoderInterface $urlDecoder,
         CustomerUrl $customerUrl,
         ResultFactory $resultFactory,
-        CheckoutSession $checkoutSession,
-        Data $coreHelper
+        CheckoutSession $checkoutSession
     ) {
         parent::__construct(
             $request,
@@ -68,7 +62,6 @@ class Redirect extends BaseRedirect
 
         $this->customerSession = $customerSession;
         $this->checkoutSession = $checkoutSession;
-        $this->coreHelper = $coreHelper;
     }
 
     public function getRedirect()
@@ -77,17 +70,12 @@ class Redirect extends BaseRedirect
 
         $result = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
 
-        if ($this->coreHelper->getStoredUrl()) {
-         $afterAmazonAuthUrl = $this->coreHelper->getStoredUrl();
-        }
-        else {
-            $afterAmazonAuthUrl = $this->customerUrl->getAccountUrl();
+        $afterAmazonAuthUrl = $this->customerUrl->getAccountUrl();
 
         if ($this->checkoutSession->getQuote() && (int)$this->checkoutSession->getQuote()->getItemsCount() > 0) {
             $afterAmazonAuthUrl = $this->url->getUrl('checkout');
         } elseif ($this->customerSession->getAfterAmazonAuthUrl()) {
             $afterAmazonAuthUrl = $this->customerSession->getAfterAmazonAuthUrl();
-            }
         }
 
         $result->setUrl($afterAmazonAuthUrl);

@@ -3,7 +3,7 @@
 define(
     [
         'jquery',
-        "uiComponent",
+        'uiComponent',
         'ko',
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/model/quote',
@@ -19,8 +19,7 @@ define(
         'Magento_Checkout/js/model/url-builder',
         'Magento_Checkout/js/checkout-data',
         'Magento_Checkout/js/model/checkout-data-resolver',
-        'uiRegistry',
-        'Amazon_Payment/js/action/populate-shipping-address'
+        'uiRegistry'
     ],
     function (
         $,
@@ -40,10 +39,10 @@ define(
         urlBuilder,
         checkoutData,
         checkoutDataResolver,
-        registry,
-        populateShippingAddressAction
+        registry
     ) {
         'use strict';
+
         var self;
 
         return Component.extend({
@@ -51,42 +50,62 @@ define(
                 template: 'Amazon_Payment/checkout-widget-address'
             },
             options: {
-		sellerId: registry.get('amazonPayment').merchantId,
+                sellerId: registry.get('amazonPayment').merchantId,
                 addressWidgetDOMId: 'addressBookWidgetDiv',
-		widgetScope: registry.get('amazonPayment').loginScope
+                widgetScope: registry.get('amazonPayment').loginScope
             },
             isCustomerLoggedIn: customer.isLoggedIn,
             isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
-	    isAmazonEnabled: ko.observable(registry.get('amazonPayment').isPwaEnabled),
+            isAmazonEnabled: ko.observable(registry.get('amazonPayment').isPwaEnabled),
             rates: shippingService.getShippingRates(),
+
+            /**
+             * Init
+             */
             initialize: function () {
                 self = this;
                 this._super();
             },
+
             /**
              * Call when component template is rendered
              */
             initAddressWidget: function () {
                 self.renderAddressWidget();
             },
+
             /**
              * render Amazon address Widget
              */
             renderAddressWidget: function () {
-                new OffAmazonPayments.Widgets.AddressBook({
+                new OffAmazonPayments.Widgets.AddressBook({ // eslint-disable-line no-undef
                     sellerId: self.options.sellerId,
                     scope: self.options.widgetScope,
+
+                    /**
+                     * Order reference creation callback
+                     */
                     onOrderReferenceCreate: function (orderReference) {
                         var orderid = orderReference.getAmazonOrderReferenceId();
+
                         amazonStorage.setOrderReference(orderid);
                     },
-                    onAddressSelect: function (orderReference) {
+
+                    /**
+                     * Address select callback
+                     */
+                    onAddressSelect: function () { // orderReference
                         self.getShippingAddressFromAmazon();
                     },
                     design: {
                         designMode: 'responsive'
                     },
+
+                    /**
+                     * Error callback
+                     */
                     onError: function (error) {
+                        console.log(error);
                     }
                 }).bind(self.options.addressWidgetDOMId);
             },
@@ -95,12 +114,16 @@ define(
              * Get shipping address from Amazon API
              */
             getShippingAddressFromAmazon: function () {
+                var serviceUrl, payload;
+
                 amazonStorage.isShippingMethodsLoading(true);
                 shippingService.isLoading(true);
-                var serviceUrl = urlBuilder.createUrl('/amazon-shipping-address/:amazonOrderReference', {amazonOrderReference: amazonStorage.getOrderReference()}),
+                serviceUrl = urlBuilder.createUrl('/amazon-shipping-address/:amazonOrderReference', {
+                        amazonOrderReference: amazonStorage.getOrderReference()
+                    }),
                     payload = {
                         addressConsentToken: amazonStorage.getAddressConsentToken()
-                };
+                    };
 
                 storage.put(
                     serviceUrl,
@@ -108,20 +131,22 @@ define(
                 ).done(
                     function (data) {
                         var amazonAddress = data.shift(),
-                            addressData = addressConverter.formAddressDataToQuoteAddress(amazonAddress);
+                            addressData = addressConverter.formAddressDataToQuoteAddress(amazonAddress),
+                            i;
 
                         //if telephone is blank set it to 00000000 so it passes the required validation
-                        addressData.telephone = !(addressData.telephone) ? '0000000000' : addressData.telephone;
+                        addressData.telephone = !addressData.telephone ? '0000000000' : addressData.telephone;
 
                         //fill in blank street fields
                         if ($.isArray(addressData.street)) {
-                            for (var i = addressData.street.length; i <= 2; i++) {
+                            for (i = addressData.street.length; i <= 2; i++) {
                                 addressData.street[i] = '';
                             }
                         }
-                        checkoutData.setShippingAddressFromData(addressConverter.quoteAddressToFormAddressData(addressData));
+                        checkoutData.setShippingAddressFromData(
+                            addressConverter.quoteAddressToFormAddressData(addressData)
+                        );
                         checkoutDataResolver.resolveEstimationAddress();
-                        populateShippingAddressAction();
                     }
                 ).fail(
                     function (response) {
@@ -133,10 +158,16 @@ define(
                 );
             },
 
+            /**
+             * Get Amazon Order Reference ID
+             */
             getAmazonOrderReference: function () {
                 return amazonStorage.getOrderReference();
             },
 
+            /**
+             * Get Amazon Address Consent Token
+             */
             getAddressConsentToken: function () {
                 return amazonStorage.getAddressConsentToken();
             }

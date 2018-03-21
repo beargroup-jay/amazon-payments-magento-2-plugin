@@ -26,17 +26,18 @@ define(
     function ($, addressConverter, quote, registry, checkoutData, checkoutDataResolver, amazonStorage) {
         'use strict';
 
-        function populateShippingForm()
-        {
+        /**
+         * Populate shipping address form in shipping step from quote model         *
+         */
+        function populateShippingForm() {
             var shippingAddressData = checkoutData.getShippingAddressFromData();
-            
+
             registry.async('checkoutProvider')(function (checkoutProvider) {
                 checkoutProvider.set(
                     'shippingAddress',
                     $.extend({}, checkoutProvider.get('shippingAddress'), shippingAddressData)
                 );
             });
-            $("#co-shipping-form").css("display", "none");
             checkoutDataResolver.resolveShippingAddress();
         }
 
@@ -45,7 +46,16 @@ define(
          * @private
          */
         return function () {
-            populateShippingForm();
-        }
+            //check to see if user is logged out of amazon (otherwise shipping form won't be in DOM)
+            if (!amazonStorage.isAmazonAccountLoggedIn) {
+                populateShippingForm();
+            }
+            //subscribe to logout and trigger shippingform population when logged out.
+            amazonStorage.isAmazonAccountLoggedIn.subscribe(function (loggedIn) {
+                if (!loggedIn) {
+                    populateShippingForm();
+                }
+            });
+        };
     }
 );

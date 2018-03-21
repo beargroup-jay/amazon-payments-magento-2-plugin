@@ -15,8 +15,8 @@
  */
 namespace Amazon\Payment\Block\Minicart;
 
+
 use Magento\Checkout\Model\Session;
-use Magento\Payment\Model\MethodInterface;
 use Amazon\Payment\Helper\Data;
 use Amazon\Core\Helper\Data as AmazonCoreHelper;
 use Amazon\Payment\Gateway\Config\Config;
@@ -95,14 +95,12 @@ class Button extends Template implements ShortcutInterface
         array $data = []
     ) {
         parent::__construct($context, $data);
-
         $this->localeResolver = $localeResolver;
         $this->mainHelper = $mainHelper;
         $this->payment = $payment;
         $this->session = $session;
         $this->coreHelper = $coreHelper;
         $this->request = $request;
-
         $this->payment->setMethodCode($this->payment::CODE);
     }
 
@@ -111,12 +109,11 @@ class Button extends Template implements ShortcutInterface
      */
     protected function shouldRender()
     {
-        if ($this->getIsCart() && $this->payment->getValue('active', $this->session->getQuote()->getStoreId())) {
+        if ($this->getIsCart() && $this->payment->isAvailable($this->session->getQuote())) {
             return true;
         }
-
         return $this->coreHelper->isPayButtonAvailableInMinicart()
-            && $this->payment->getValue('active', $this->session->getQuote()->getStoreId())
+            && $this->payment->isAvailable($this->session->getQuote())
             && $this->isMiniCart;
     }
 

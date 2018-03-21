@@ -15,7 +15,7 @@
                 <title>Amazon Pay</title>
                 <sort_order>1</sort_order>
                 <model>AmazonFacade</model>
-                <order_status>pending_payment</order_status>
+                <order_status>processing</order_status>
                 <payment_action>authorize</payment_action>
                 <can_authorize>1</can_authorize>
                 <can_capture>1</can_capture>
@@ -26,7 +26,6 @@
                 <can_refund>1</can_refund>
                 <can_use_checkout>1</can_use_checkout>
                 <packstation_terms>Packstation,Pack-Station,Pack Station,PO Box,Post Office box,Locker</packstation_terms>
-                <pwa_enabled>0</pwa_enabled>
                 <lwa_enabled>0</lwa_enabled>
                 <authorization_mode>synchronous</authorization_mode>
                 <update_mechanism>polling</update_mechanism>
