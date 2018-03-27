@@ -16,7 +16,7 @@
 namespace Amazon\Core\Observer;
 
 use Amazon\Core\Helper\Data;
-use Amazon\Core\Model\Validation\ApiCredentialsValidatorFactory;
+use Amazon\Core\Model\Validation\ApiCredentialsValidator;
 use Amazon\Core\Model\Config\Credentials\Json;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
@@ -28,9 +28,9 @@ use Magento\Store\Model\ScopeInterface;
 class PaymentConfigSaveAfter implements ObserverInterface
 {
     /**
-     * @var ApiCredentialsValidatorFactory
+     * @var ApiCredentialsValidator
      */
-    private $apiCredentialsValidatorFactory;
+    private $apiCredentialsValidator;
 
     /**
      * @var ManagerInterface
@@ -60,20 +60,20 @@ class PaymentConfigSaveAfter implements ObserverInterface
     private $request;
 
     /**
-     * @param ApiCredentialsValidatorFactory $apiCredentialsValidatorFactory
+     * @param ApiCredentialsValidator $apiCredentialsValidator
      * @param ManagerInterface               $messageManager
      * @param Json                           $jsonCredentials
      * @param Data                           $amazonCoreHelper
      */
     public function __construct(
-        ApiCredentialsValidatorFactory $apiCredentialsValidatorFactory,
+        ApiCredentialsValidator $apiCredentialsValidator,
         ManagerInterface $messageManager,
         Json $jsonCredentials,
         Data $amazonCoreHelper,
         ReinitableConfigInterface $config,
         RequestInterface $request
     ) {
-        $this->apiCredentialsValidatorFactory = $apiCredentialsValidatorFactory;
+        $this->apiCredentialsValidator = $apiCredentialsValidator;
         $this->messageManager                 = $messageManager;
         $this->amazonCoreHelper               = $amazonCoreHelper;
         $this->jsonCredentials                = $jsonCredentials;
@@ -103,7 +103,7 @@ class PaymentConfigSaveAfter implements ObserverInterface
          *
  * @see \Magento\Config\Model\Config::save() 
 */
-        $validator = $this->apiCredentialsValidatorFactory->create();
+        $validator = $this->apiCredentialsValidator->create();
 
         $messageManagerMethod = 'addErrorMessage';
 
