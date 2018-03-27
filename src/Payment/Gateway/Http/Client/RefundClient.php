@@ -25,6 +25,7 @@ use Amazon\Payment\Domain\AmazonRefundResponseFactory;
 
 /**
  * Class RefundClient
+ *
  * @package Amazon\Payment\Gateway\Http\Client
  */
 class RefundClient implements ClientInterface
@@ -50,16 +51,16 @@ class RefundClient implements ClientInterface
 
     /**
      * RefundClient constructor.
-     * @param Logger $logger
-     * @param ClientFactoryInterface $clientFactory
+     *
+     * @param Logger                      $logger
+     * @param ClientFactoryInterface      $clientFactory
      * @param AmazonRefundResponseFactory $refundResponseFactory
      */
     public function __construct(
         Logger $logger,
         ClientFactoryInterface $clientFactory,
         AmazonRefundResponseFactory $refundResponseFactory
-    )
-    {
+    ) {
         $this->refundResponseFactory = $refundResponseFactory;
         $this->logger = $logger;
         $this->clientFactory = $clientFactory;

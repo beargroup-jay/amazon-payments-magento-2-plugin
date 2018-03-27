@@ -39,10 +39,12 @@ class AmazonSetOrderDetailsResponse
 
         if (isset($details['Constraints'])) {
             foreach ($details['Constraints'] as $constraint) {
-                $this->constraints[] = $amazonConstraintFactory->create([
+                $this->constraints[] = $amazonConstraintFactory->create(
+                    [
                     'id'          => $constraint['ConstraintID'],
                     'description' => $constraint['Description']
-                ]);
+                    ]
+                );
             }
         }
     }

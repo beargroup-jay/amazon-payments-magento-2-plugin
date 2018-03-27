@@ -34,7 +34,7 @@ class SandboxSimulation implements ObserverInterface
     private $quoteLinkFactory;
 
     /**
-     * @param Data $coreHelper
+     * @param Data                      $coreHelper
      * @param QuoteLinkInterfaceFactory $quoteLinkFactory
      */
     public function __construct(
@@ -107,8 +107,8 @@ class SandboxSimulation implements ObserverInterface
         $simulationReference = null;
 
         $additionalInformation = $payment->getAdditionalInformation();
-        if (is_array($additionalInformation) &&
-            array_key_exists('sandbox_simulation_reference', $additionalInformation)
+        if (is_array($additionalInformation) 
+            && array_key_exists('sandbox_simulation_reference', $additionalInformation)
         ) {
             $simulationReference = $additionalInformation['sandbox_simulation_reference'];
         }
@@ -161,7 +161,7 @@ class SandboxSimulation implements ObserverInterface
     }
 
     /**
-     * @param string $simulationReference
+     * @param string      $simulationReference
      * @param string|null $context
      * @return string
      */

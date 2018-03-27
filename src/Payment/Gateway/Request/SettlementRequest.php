@@ -63,13 +63,14 @@ class SettlementRequest implements BuilderInterface
 
     /**
      * SettlementRequest constructor.
-     * @param Config $config
-     * @param ProductMetadata $productMetadata
+     *
+     * @param Config                   $config
+     * @param ProductMetadata          $productMetadata
      * @param OrderRepositoryInterface $orderRepository
-     * @param CartRepositoryInterface $quoteRepository
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
-     * @param Logger $logger
+     * @param CartRepositoryInterface  $quoteRepository
+     * @param SubjectReader            $subjectReader
+     * @param Data                     $coreHelper
+     * @param Logger                   $logger
      */
     public function __construct(
         Config $config,

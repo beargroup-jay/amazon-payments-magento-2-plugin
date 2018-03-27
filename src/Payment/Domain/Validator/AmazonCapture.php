@@ -34,11 +34,11 @@ class AmazonCapture
         $status = $details->getStatus();
 
         switch ($status->getState()) {
-            case AmazonCaptureStatus::STATE_COMPLETED:
-                return true;
-            case AmazonCaptureStatus::STATE_PENDING:
-            case AmazonCaptureStatus::STATE_DECLINED:
-                throw new CapturePendingException();
+        case AmazonCaptureStatus::STATE_COMPLETED:
+            return true;
+        case AmazonCaptureStatus::STATE_PENDING:
+        case AmazonCaptureStatus::STATE_DECLINED:
+            throw new CapturePendingException();
         }
 
         throw new StateException(

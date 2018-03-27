@@ -33,7 +33,7 @@ class AddAmazonButton implements ObserverInterface
     private $shortcutFactory;
 
     /**
-     * @param Data $coreHelper
+     * @param Data            $coreHelper
      * @param ShortcutFactory $shortcutFactory
      */
     public function __construct(
@@ -46,7 +46,11 @@ class AddAmazonButton implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        /** @var \Magento\Catalog\Block\ShortcutButtons $shortcutButtons */
+        /**
+* 
+         *
+ * @var \Magento\Catalog\Block\ShortcutButtons $shortcutButtons 
+*/
         $shortcutButtons = $observer->getEvent()->getContainer();
 
         if ($this->coreHelper->isPwaEnabled() && $this->coreHelper->isCurrentCurrencySupportedByAmazon()) {
@@ -55,7 +59,11 @@ class AddAmazonButton implements ObserverInterface
             ];
             $params['checkoutSession'] = $observer->getEvent()->getCheckoutSession();
 
-            /** @var \Magento\Framework\View\Element\Template $shortcut */
+            /**
+* 
+             *
+ * @var \Magento\Framework\View\Element\Template $shortcut 
+*/
             $shortcut = $shortcutButtons->getLayout()->createBlock(
                 \Amazon\Payment\Block\Minicart\Button::class,
                 '',

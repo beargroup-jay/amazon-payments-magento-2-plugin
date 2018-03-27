@@ -17,21 +17,24 @@ define(
     ) {
         'use strict';
 
-        return Component.extend({
-            defaults: {
-                template: 'Amazon_Payment/checkout-sandbox-simulator'
-            },
-            isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
-            isSandboxEnabled: ko.observable(registry.get('amazonPayment').isSandboxEnabled),
-            sandboxSimulationReference: amazonStorage.sandboxSimulationReference,
-            sandboxSimulationOptions: ko.observableArray(registry.get('amazonPayment').sandboxSimulationOptions),
+        return Component.extend(
+            {
+                defaults: {
+                    template: 'Amazon_Payment/checkout-sandbox-simulator'
+                },
+                isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
+                isSandboxEnabled: ko.observable(registry.get('amazonPayment').isSandboxEnabled),
+                sandboxSimulationReference: amazonStorage.sandboxSimulationReference,
+                sandboxSimulationOptions: ko.observableArray(registry.get('amazonPayment').sandboxSimulationOptions),
 
-            /**
-             * Init
-             */
-            initialize: function () {
-                this._super();
+                /**
+                 * Init
+                 */
+                initialize: function () {
+                    this._super();
+                }
             }
-        });
+        );
     }
 );
+

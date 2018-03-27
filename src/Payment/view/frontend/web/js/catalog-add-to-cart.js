@@ -13,41 +13,50 @@
  * permissions and limitations under the License.
  */
 
-define([
+define(
+    [
     'jquery',
     'Magento_Catalog/js/catalog-add-to-cart',
     'jquery/ui'
-], function ($) {
-    'use strict';
+    ], function ($) {
+        'use strict';
 
-    $.widget('amazon.catalogAddToCart', $.mage.catalogAddToCart, {
+        $.widget(
+            'amazon.catalogAddToCart', $.mage.catalogAddToCart, {
 
-        /**
-         * Set submit
-         * @private
-         */
-        _create: function () {
-            //this is overridden here and ignores the redirect option until fixed by Magento (as of 2.1)
-            this._bindSubmit();
-        },
+                /**
+                 * Set submit
+                 *
+                 * @private
+                 */
+                _create: function () {
+                    //this is overridden here and ignores the redirect option until fixed by Magento (as of 2.1)
+                    this._bindSubmit();
+                },
 
-        /**
-         * Bind submit
-         * @private
-         */
-        _bindSubmit: function () {
-            var self = this;
+                /**
+                 * Bind submit
+                 *
+                 * @private
+                 */
+                _bindSubmit: function () {
+                    var self = this;
 
-            this.element.mage('validation');
-            this.element.on('submit', function (e) {
-                e.preventDefault();
+                    this.element.mage('validation');
+                    this.element.on(
+                        'submit', function (e) {
+                            e.preventDefault();
 
-                if (self.element.valid()) {
-                    self.submitForm($(this));
+                            if (self.element.valid()) {
+                                self.submitForm($(this));
+                            }
+                        }
+                    );
                 }
-            });
-        }
-    });
+            }
+        );
 
-    return $.amazon.catalogAddToCart;
-});
+        return $.amazon.catalogAddToCart;
+    }
+);
+

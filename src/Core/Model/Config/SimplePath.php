@@ -42,6 +42,7 @@ class SimplePath
 
     /**
      * SimplePath constructor.
+     *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -60,7 +61,7 @@ class SimplePath
         \Magento\Paypal\Model\Config $paypal,
         \Psr\Log\LoggerInterface $logger
     ) {
-        $this->coreHelper   = $coreHelper;
+        $this->coreHelper    = $coreHelper;
         $this->config        = $config;
         $this->scopeConfig   = $scopeConfig;
         $this->productMeta   = $productMeta;
@@ -98,16 +99,16 @@ class SimplePath
 
         // Set scope ID
         switch ($this->_scope) {
-            case 'websites':
-                $this->_scopeId = $this->_websiteId;
-                break;
-            case 'stores':
-                $this->_scopeId = $this->_storeId;
-                break;
-            default:
-                $this->_scope = 'default';
-                $this->_scopeId = 0;
-                break;
+        case 'websites':
+            $this->_scopeId = $this->_websiteId;
+            break;
+        case 'stores':
+            $this->_scopeId = $this->_storeId;
+            break;
+        default:
+            $this->_scope = 'default';
+            $this->_scopeId = 0;
+            break;
         }
     }
 
@@ -170,7 +171,7 @@ class SimplePath
     /**
      * Return RSA public key
      *
-     * @param bool $pemformat  Return key in PEM format
+     * @param bool $pemformat Return key in PEM format
      */
     public function getPublicKey($pemformat = false, $reset = false)
     {
@@ -212,7 +213,7 @@ class SimplePath
     /**
      * Verify and decrypt JSON payload
      *
-     * @param string $payloadJson
+     * @param                                        string $payloadJson
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function decryptPayload($payloadJson, $autoEnable = true, $autoSave = true)
@@ -222,28 +223,34 @@ class SimplePath
             $payloadVerify = clone $payload;
 
             // Unencrypted via admin
-            if ($this->state->getAreaCode() == 'adminhtml' &&
-                isset($payload->merchant_id, $payload->access_key, $payload->secret_key)
+            if ($this->state->getAreaCode() == 'adminhtml' 
+                && isset($payload->merchant_id, $payload->access_key, $payload->secret_key)
             ) {
                 return $this->saveToConfig($payloadJson, $autoEnable);
             }
 
             // Validate JSON
             if (!isset($payload->encryptedKey, $payload->encryptedPayload, $payload->iv, $payload->sigKeyID)) {
-                throw new \Magento\Framework\Validator\Exception(__('Unable to import Amazon keys. ' .
-                    'Please verify your JSON format and values.'));
+                throw new \Magento\Framework\Validator\Exception(
+                    __(
+                        'Unable to import Amazon keys. ' .
+                        'Please verify your JSON format and values.'
+                    )
+                );
             }
 
             foreach ($payload as $key => $value) {
-                $payload->$key = urldecode($value);
+                $payload->$key = rawurldecode($value);
             }
 
             // Retrieve Amazon public key to verify signature
             try {
-                $client = new \Zend_Http_Client($this->getEndpointPubkey(), [
+                $client = new \Zend_Http_Client(
+                    $this->getEndpointPubkey(), [
                     'maxredirects' => 2,
                     'timeout'      => 30,
-                ]);
+                    ]
+                );
                 $client->setParameterGet(['sigkey_id' => $payload->sigKeyID]);
                 $response = $client->request();
                 $amazonPublickey = urldecode($response->getBody());
@@ -256,8 +263,8 @@ class SimplePath
             $payloadVerifyJson = json_encode($payloadVerify);
 
             // Verify signature using Amazon publickey and JSON paylaod
-            if ($amazonPublickey &&
-                openssl_verify(
+            if ($amazonPublickey 
+                && openssl_verify(
                     $payloadVerifyJson,
                     base64_decode($payload->signature),
                     $this->key2pem($amazonPublickey),
@@ -308,8 +315,12 @@ class SimplePath
             $this->logger->critical($e);
             $this->messageManager->addError(__($e->getMessage()));
             $link = 'https://payments.amazon.com/help/202024240';
-            $this->messageManager->addError(__("If you're experiencing consistent errors with transferring keys, " .
-                "click <a href=\"%1\" target=\"_blank\">Manual Transfer Instructions</a> to learn more.", $link));
+            $this->messageManager->addError(
+                __(
+                    "If you're experiencing consistent errors with transferring keys, " .
+                    "click <a href=\"%1\" target=\"_blank\">Manual Transfer Instructions</a> to learn more.", $link
+                )
+            );
         }
 
         return false;

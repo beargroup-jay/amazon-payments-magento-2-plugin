@@ -50,7 +50,7 @@ class CategoryExclusion extends AbstractHelper
     public function getExcludedCategories($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
     {
         $excludedCategoryIds = $this->scopeConfig
-                                    ->getValue('payment/amazon_payment/excluded_categories', $scope, $scopeCode);
+            ->getValue('payment/amazon_payment/excluded_categories', $scope, $scopeCode);
 
         return explode(',', $excludedCategoryIds);
     }
@@ -78,7 +78,11 @@ class CategoryExclusion extends AbstractHelper
     public function isQuoteDirty()
     {
         if (!empty($this->getExcludedCategories())) {
-            /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $quoteItem */
+            /**
+* 
+             *
+ * @var \Magento\Quote\Model\Quote\Item\AbstractItem $quoteItem 
+*/
             foreach ($this->checkoutSession->getQuote()->getAllItems() as $quoteItem) {
                 $isDirtyQuoteItem = $quoteItem->getDataUsingMethod(
                     CategoryExclusion::ATTR_QUOTE_ITEM_IS_EXCLUDED_PRODUCT

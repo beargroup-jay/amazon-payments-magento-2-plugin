@@ -44,7 +44,7 @@ class UpgradeData implements UpgradeDataInterface
         }
 
         // Used update query because all scopes needed to have this value updated and this is a fast, simple approach
-        if (version_compare($context->getVersion(), '1.2.5', '<')) {
+        if (version_compare($context->getVersion(), '1.2.6', '<')) {
 
             $sql = "SELECT c.config_id 
                     FROM core_config_data c 
@@ -75,7 +75,11 @@ class UpgradeData implements UpgradeDataInterface
             'unsigned' => true
         ];
 
-        /** @var \Magento\Quote\Setup\QuoteSetup $quoteSetup */
+        /**
+* 
+         *
+ * @var \Magento\Quote\Setup\QuoteSetup $quoteSetup 
+*/
         $quoteSetup = $this->quoteSetupFactory->create(['setup' => $setup]);
 
         $quoteSetup->addAttribute('quote_item', CategoryExclusion::ATTR_QUOTE_ITEM_IS_EXCLUDED_PRODUCT, $options);

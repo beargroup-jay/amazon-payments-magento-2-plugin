@@ -42,16 +42,16 @@ class CompleteAuthHandler implements HandlerInterface
 
     /**
      * CompleteAuthHandler constructor.
-     * @param Logger $logger
+     *
+     * @param Logger        $logger
      * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
+     * @param Data          $coreHelper
      */
     public function __construct(
         Logger $logger,
         SubjectReader $subjectReader,
         Data $coreHelper
-    )
-    {
+    ) {
         $this->logger = $logger;
         $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;

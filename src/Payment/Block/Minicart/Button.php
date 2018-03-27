@@ -75,14 +75,15 @@ class Button extends Template implements ShortcutInterface
 
     /**
      * Button constructor.
-     * @param Context $context
+     *
+     * @param Context           $context
      * @param ResolverInterface $localeResolver
-     * @param Data $mainHelper
-     * @param Session $session
-     * @param Config $payment
-     * @param AmazonCoreHelper $coreHelper
-     * @param Http $request
-     * @param array $data
+     * @param Data              $mainHelper
+     * @param Session           $session
+     * @param Config            $payment
+     * @param AmazonCoreHelper  $coreHelper
+     * @param Http              $request
+     * @param array             $data
      */
     public function __construct(
         Context $context,

@@ -43,9 +43,11 @@ abstract class AbstractAmazonRefundResponse
             throw new AmazonServiceUnavailableException();
         }
 
-        $this->details = $amazonRefundDetailsFactory->create([
+        $this->details = $amazonRefundDetailsFactory->create(
+            [
             'details' => $data[$this->getResultKey()]['RefundDetails']
-        ]);
+            ]
+        );
     }
 
     /**

@@ -32,6 +32,7 @@ use Amazon\Login\Api\CustomerLinkManagementInterface;
 
 /**
  * Login with token controller
+ *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 abstract class Login extends Action
@@ -92,18 +93,18 @@ abstract class Login extends Action
     protected $logger;
 
     /**
-     * @param AmazonCustomerFactory       $amazonCustomerFactory
-     * @param ClientFactoryInterface      $clientFactory
-     * @param LoggerInterface             $logger
-     * @param AmazonCoreHelper            $amazonCoreHelper
-     * @param Url                         $customerUrl
-     * @param AccessTokenRequestValidator $accessTokenRequestValidator
-     * @param AccountRedirect             $accountRedirect
-     * @param CompositeMatcherInterface   $matcher
-     * @param CustomerLinkManagementInterface    $customerLinkManagement
-     * @param CustomerSession             $customerSession
-     * @param Session                     $session
-     * @param LoggerInterface             $logger
+     * @param AmazonCustomerFactory           $amazonCustomerFactory
+     * @param ClientFactoryInterface          $clientFactory
+     * @param LoggerInterface                 $logger
+     * @param AmazonCoreHelper                $amazonCoreHelper
+     * @param Url                             $customerUrl
+     * @param AccessTokenRequestValidator     $accessTokenRequestValidator
+     * @param AccountRedirect                 $accountRedirect
+     * @param CompositeMatcherInterface       $matcher
+     * @param CustomerLinkManagementInterface $customerLinkManagement
+     * @param CustomerSession                 $customerSession
+     * @param Session                         $session
+     * @param LoggerInterface                 $logger
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -143,8 +144,8 @@ abstract class Login extends Action
     {
         try {
             $userInfo = $this->clientFactory
-                             ->create()
-                             ->getUserInfo($this->getRequest()->getParam('access_token'));
+                ->create()
+                ->getUserInfo($this->getRequest()->getParam('access_token'));
 
             if (is_array($userInfo) && isset($userInfo['user_id'])) {
                 $data = [

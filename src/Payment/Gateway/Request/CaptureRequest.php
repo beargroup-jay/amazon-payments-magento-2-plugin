@@ -54,11 +54,11 @@ class CaptureRequest implements BuilderInterface
     /**
      * CaptureRequest constructor.
      *
-     * @param Config $config
+     * @param Config          $config
      * @param ProductMetadata $productMetadata
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
-     * @param Logger $logger
+     * @param SubjectReader   $subjectReader
+     * @param Data            $coreHelper
+     * @param Logger          $logger
      */
     public function __construct(
         Config $config,

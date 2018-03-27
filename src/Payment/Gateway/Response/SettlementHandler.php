@@ -54,11 +54,12 @@ class SettlementHandler implements HandlerInterface
 
     /**
      * SettlementHandler constructor.
-     * @param Logger $logger
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
+     *
+     * @param Logger                   $logger
+     * @param SubjectReader            $subjectReader
+     * @param Data                     $coreHelper
      * @param OrderRepositoryInterface $orderRepository
-     * @param CartRepositoryInterface $quoteRepository
+     * @param CartRepositoryInterface  $quoteRepository
      */
     public function __construct(
         Logger $logger,
@@ -66,8 +67,7 @@ class SettlementHandler implements HandlerInterface
         Data $coreHelper,
         OrderRepositoryInterface $orderRepository,
         CartRepositoryInterface $quoteRepository
-    )
-    {
+    ) {
         $this->logger = $logger;
         $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;

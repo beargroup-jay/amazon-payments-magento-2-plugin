@@ -42,7 +42,11 @@ class AddressBlacklistTermsValidator extends AbstractValidator
             return true;
         }
 
-        /** @var $entity \Magento\Customer\Api\Data\AddressInterface */
+        /**
+* 
+         *
+ * @var $entity \Magento\Customer\Api\Data\AddressInterface 
+*/
         $addressLines = (array) $entity->getStreet();
 
         foreach ($this->amazonCoreHelper->getBlackListedTerms() as $term) {

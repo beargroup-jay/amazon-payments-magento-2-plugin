@@ -31,9 +31,9 @@ class AmazonPreCapture
         $status = $details->getStatus();
 
         switch ($status->getReasonCode()) {
-            case AmazonAuthorizationStatus::REASON_EXPIRED_UNUSED:
-            case AmazonAuthorizationStatus::REASON_SELLER_CLOSED:
-                throw new AuthorizationExpiredException();
+        case AmazonAuthorizationStatus::REASON_EXPIRED_UNUSED:
+        case AmazonAuthorizationStatus::REASON_SELLER_CLOSED:
+            throw new AuthorizationExpiredException();
         }
     }
 }

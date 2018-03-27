@@ -65,11 +65,11 @@ class AmazonConstraint
     public function getErrorMessage()
     {
         switch ($this->getId()) {
-            case static::PAYMENT_METHOD_NOT_ALLOWED_ID:
-            case static::PAYMENT_PLAN_NOT_SET_ID:
-                return 'Please select a payment method.';
-            default:
-                return 'Amazon could not process your request.';
+        case static::PAYMENT_METHOD_NOT_ALLOWED_ID:
+        case static::PAYMENT_PLAN_NOT_SET_ID:
+            return 'Please select a payment method.';
+        default:
+            return 'Amazon could not process your request.';
         }
     }
 }

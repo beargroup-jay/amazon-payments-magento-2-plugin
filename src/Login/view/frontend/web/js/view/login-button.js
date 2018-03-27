@@ -32,20 +32,23 @@ define(
     ) {
         'use strict';
 
-        return Component.extend({
-            defaults: {
-                template: 'Amazon_Login/login-button'
-            },
-            isCustomerLoggedIn: customer.isLoggedIn,
-            isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
-            isLwaVisible: ko.observable(amazonPaymentConfig.getValue('isLwaEnabled')),
+        return Component.extend(
+            {
+                defaults: {
+                    template: 'Amazon_Login/login-button'
+                },
+                isCustomerLoggedIn: customer.isLoggedIn,
+                isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
+                isLwaVisible: ko.observable(amazonPaymentConfig.getValue('isLwaEnabled')),
 
-            /**
-             * Initialize login button
-             */
-            initialize: function () {
-                this._super();
+                /**
+                 * Initialize login button
+                 */
+                initialize: function () {
+                    this._super();
+                }
             }
-        });
+        );
     }
 );
+

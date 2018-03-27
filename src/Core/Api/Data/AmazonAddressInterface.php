@@ -54,7 +54,7 @@ interface AmazonAddressInterface
     /**
      * Get an address line
      *
-     * @param int $lineNumber
+     * @param  int $lineNumber
      * @return null|string
      */
     public function getLine($lineNumber);

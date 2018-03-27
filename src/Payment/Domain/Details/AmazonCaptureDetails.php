@@ -39,10 +39,12 @@ class AmazonCaptureDetails
     public function __construct(AmazonCaptureStatusFactory $amazonCaptureStatusFactory, array $details)
     {
         $status       = $details['CaptureStatus'];
-        $this->status = $amazonCaptureStatusFactory->create([
+        $this->status = $amazonCaptureStatusFactory->create(
+            [
             'state'      => $status['State'],
             'reasonCode' => (isset($status['ReasonCode']) ? $status['ReasonCode'] : null)
-        ]);
+            ]
+        );
 
         if (isset($details['AmazonCaptureId'])) {
             $this->transactionId = $details['AmazonCaptureId'];

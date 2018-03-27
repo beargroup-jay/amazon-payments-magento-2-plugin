@@ -45,9 +45,11 @@ abstract class AbstractAmazonCaptureResponse
 
         $details = $data[$this->getResultKey()]['CaptureDetails'];
 
-        $this->details = $amazonCaptureDetailsFactory->create([
+        $this->details = $amazonCaptureDetailsFactory->create(
+            [
             'details' => $details
-        ]);
+            ]
+        );
     }
 
     /**

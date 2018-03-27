@@ -26,41 +26,44 @@ define(
     ) {
         'use strict';
 
-        return Component.extend({
-            defaults: {
-                template: 'Amazon_Payment/checkout-revert'
-            },
-            isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
-            isAmazonEnabled: ko.observable(registry.get('amazonPayment').isPwaEnabled),
+        return Component.extend(
+            {
+                defaults: {
+                    template: 'Amazon_Payment/checkout-revert'
+                },
+                isAmazonAccountLoggedIn: amazonStorage.isAmazonAccountLoggedIn,
+                isAmazonEnabled: ko.observable(registry.get('amazonPayment').isPwaEnabled),
 
-            /**
-             * Init
-             */
-            initialize: function () {
-                this._super();
-            },
+                /**
+                 * Init
+                 */
+                initialize: function () {
+                    this._super();
+                },
 
-            /**
-             * Revert checkout
-             */
-            revertCheckout: function () {
-                var serviceUrl = urlBuilder.createUrl('/amazon/order-ref', {});
+                /**
+                 * Revert checkout
+                 */
+                revertCheckout: function () {
+                    var serviceUrl = urlBuilder.createUrl('/amazon/order-ref', {});
 
-                fullScreenLoader.startLoader();
-                storage.delete(
-                    serviceUrl
-                ).done(
-                    function () {
-                        amazonStorage.amazonlogOut();
-                        window.location.reload();
-                    }
-                ).fail(
-                    function (response) {
-                        fullScreenLoader.stopLoader();
-                        errorProcessor.process(response);
-                    }
-                );
+                    fullScreenLoader.startLoader();
+                    storage.delete(
+                        serviceUrl
+                    ).done(
+                        function () {
+                            amazonStorage.amazonlogOut();
+                            window.location.reload();
+                        }
+                    ).fail(
+                        function (response) {
+                            fullScreenLoader.stopLoader();
+                            errorProcessor.process(response);
+                        }
+                    );
+                }
             }
-        });
+        );
     }
 );
+

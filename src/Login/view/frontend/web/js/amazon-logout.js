@@ -13,36 +13,43 @@
  * permissions and limitations under the License.
  */
 
-define([
+define(
+    [
     'jquery',
     'amazonCore',
     'jquery/ui'
-], function ($, core) {
-    'use strict';
+    ], function ($, core) {
+        'use strict';
 
-    $.widget('amazon.AmazonLogout', {
-        options: {
-            onInit: false
-        },
+        $.widget(
+            'amazon.AmazonLogout', {
+                options: {
+                    onInit: false
+                },
 
-        /**
-         * Create Amazon Logout Widget
-         * @private
-         */
-        _create: function () {
-            if (this.options.onInit) {
-                core.AmazonLogout(); //logout amazon user on init
+                /**
+                 * Create Amazon Logout Widget
+                 *
+                 * @private
+                 */
+                _create: function () {
+                    if (this.options.onInit) {
+                        core.AmazonLogout(); //logout amazon user on init
+                    }
+                },
+
+                /**
+                 * Logs out a user if called directly
+                 *
+                 * @private
+                 */
+                _logoutAmazonUser: function () {
+                    core.AmazonLogout();
+                }
             }
-        },
+        );
 
-        /**
-         * Logs out a user if called directly
-         * @private
-         */
-        _logoutAmazonUser: function () {
-            core.AmazonLogout();
-        }
-    });
+        return $.amazon.AmazonLogout;
+    }
+);
 
-    return $.amazon.AmazonLogout;
-});

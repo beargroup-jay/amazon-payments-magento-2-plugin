@@ -32,7 +32,7 @@ class ClientIp extends AbstractHelper
     private $clientHasAllowedIp;
 
     /**
-     * @param Context       $context
+     * @param Context $context
      */
     public function __construct(Context $context)
     {

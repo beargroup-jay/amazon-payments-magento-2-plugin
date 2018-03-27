@@ -29,20 +29,24 @@ define(
         /**
          * Populate shipping address form in shipping step from quote model         *
          */
-        function populateShippingForm() {
+        function populateShippingForm() 
+        {
             var shippingAddressData = checkoutData.getShippingAddressFromData();
 
-            registry.async('checkoutProvider')(function (checkoutProvider) {
-                checkoutProvider.set(
-                    'shippingAddress',
-                    $.extend({}, checkoutProvider.get('shippingAddress'), shippingAddressData)
-                );
-            });
+            registry.async('checkoutProvider')(
+                function (checkoutProvider) {
+                    checkoutProvider.set(
+                        'shippingAddress',
+                        $.extend({}, checkoutProvider.get('shippingAddress'), shippingAddressData)
+                    );
+                }
+            );
             checkoutDataResolver.resolveShippingAddress();
         }
 
         /**
          * Populate shipping address form in shipping step from quote model
+         *
          * @private
          */
         return function () {
@@ -51,11 +55,14 @@ define(
                 populateShippingForm();
             }
             //subscribe to logout and trigger shippingform population when logged out.
-            amazonStorage.isAmazonAccountLoggedIn.subscribe(function (loggedIn) {
-                if (!loggedIn) {
-                    populateShippingForm();
+            amazonStorage.isAmazonAccountLoggedIn.subscribe(
+                function (loggedIn) {
+                    if (!loggedIn) {
+                        populateShippingForm();
+                    }
                 }
-            });
+            );
         };
     }
 );
+

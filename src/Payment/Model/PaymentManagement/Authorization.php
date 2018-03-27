@@ -109,21 +109,21 @@ class Authorization extends AbstractOperation
     /**
      * Authorization constructor.
      *
-     * @param NotifierInterface                         $notifier
-     * @param UrlInterface                              $urlBuilder
-     * @param SearchCriteriaBuilderFactory              $searchCriteriaBuilderFactory
-     * @param InvoiceRepositoryInterface                $invoiceRepository
-     * @param ClientFactoryInterface                    $clientFactory
-     * @param PendingAuthorizationInterfaceFactory      $pendingAuthorizationFactory
-     * @param AmazonAuthorizationDetailsResponseFactory $amazonAuthorizationDetailsResponseFactory
-     * @param AmazonAuthorization                       $amazonAuthorizationValidator
-     * @param OrderPaymentRepositoryInterface           $orderPaymentRepository
-     * @param OrderRepositoryInterface                  $orderRepository
-     * @param ManagerInterface                          $eventManager
-     * @param AmazonGetOrderDetailsResponseFactory      $amazonGetOrderDetailsResponseFactory
-     * @param StoreManagerInterface                     $storeManager
-     * @param PaymentManagement                         $paymentManagement
-     * @param LoggerInterface                           $logger
+     * @param                                          NotifierInterface                         $notifier
+     * @param                                          UrlInterface                              $urlBuilder
+     * @param                                          SearchCriteriaBuilderFactory              $searchCriteriaBuilderFactory
+     * @param                                          InvoiceRepositoryInterface                $invoiceRepository
+     * @param                                          ClientFactoryInterface                    $clientFactory
+     * @param                                          PendingAuthorizationInterfaceFactory      $pendingAuthorizationFactory
+     * @param                                          AmazonAuthorizationDetailsResponseFactory $amazonAuthorizationDetailsResponseFactory
+     * @param                                          AmazonAuthorization                       $amazonAuthorizationValidator
+     * @param                                          OrderPaymentRepositoryInterface           $orderPaymentRepository
+     * @param                                          OrderRepositoryInterface                  $orderRepository
+     * @param                                          ManagerInterface                          $eventManager
+     * @param                                          AmazonGetOrderDetailsResponseFactory      $amazonGetOrderDetailsResponseFactory
+     * @param                                          StoreManagerInterface                     $storeManager
+     * @param                                          PaymentManagement                         $paymentManagement
+     * @param                                          LoggerInterface                           $logger
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -216,9 +216,11 @@ class Authorization extends AbstractOperation
         $authorizationId = $pendingAuthorization->getAuthorizationId();
 
         if (null === $authorizationDetails) {
-            $responseParser = $this->clientFactory->create($storeId)->getAuthorizationDetails([
+            $responseParser = $this->clientFactory->create($storeId)->getAuthorizationDetails(
+                [
                 'amazon_authorization_id' => $authorizationId
-            ]);
+                ]
+            );
 
             $response = $this->amazonAuthorizationDetailsResponseFactory->create(['response' => $responseParser]);
             $authorizationDetails = $response->getDetails();
@@ -364,9 +366,11 @@ class Authorization extends AbstractOperation
         $this->storeManager->setCurrentStore($storeId);
 
         if (null === $orderDetails) {
-            $responseParser = $this->clientFactory->create($storeId)->getOrderReferenceDetails([
+            $responseParser = $this->clientFactory->create($storeId)->getOrderReferenceDetails(
+                [
                 'amazon_order_reference_id' => $order->getExtensionAttributes()->getAmazonOrderReferenceId()
-            ]);
+                ]
+            );
 
             $response     = $this->amazonGetOrderDetailsResponseFactory->create(['response' => $responseParser]);
             $orderDetails = $response->getDetails();

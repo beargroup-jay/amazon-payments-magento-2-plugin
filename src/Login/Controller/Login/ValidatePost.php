@@ -54,12 +54,12 @@ class ValidatePost extends Action
     /**
      * ValidatePost constructor.
      *
-     * @param Context                  $context
-     * @param Session                  $session
-     * @param AccountRedirect          $accountRedirect
-     * @param CustomerRegistry         $customerRegistry
-     * @param Encryptor                $encryptor
-     * @param customerLinkManagement   $customerLinkManagement
+     * @param Context                $context
+     * @param Session                $session
+     * @param AccountRedirect        $accountRedirect
+     * @param CustomerRegistry       $customerRegistry
+     * @param Encryptor              $encryptor
+     * @param customerLinkManagement $customerLinkManagement
      */
     public function __construct(
         Context $context,

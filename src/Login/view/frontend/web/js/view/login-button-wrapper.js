@@ -17,16 +17,21 @@ var registry = require('uiRegistry'),
     amazonPayment = registry.get('amazonPayment');
 
 if (amazonPayment !== undefined && amazonPayment.allowAmLoginLoading === true) {
-    define(['require', 'Amazon_Login/js/view/login-button'], function (require) {
-        'use strict';
+    define(
+        ['require', 'Amazon_Login/js/view/login-button'], function (require) {
+            'use strict';
 
-        return require('Amazon_Login/js/view/login-button');
-    });
+            return require('Amazon_Login/js/view/login-button');
+        }
+    );
 } else {
-    define(['require', 'uiComponent'], function (require) {
-        'use strict';
+    define(
+        ['require', 'uiComponent'], function (require) {
+            'use strict';
 
-        return require('uiComponent');
-    });
+            return require('uiComponent');
+        }
+    );
 }
+
 

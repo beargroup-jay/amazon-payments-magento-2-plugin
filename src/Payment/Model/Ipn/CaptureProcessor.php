@@ -69,9 +69,11 @@ class CaptureProcessor implements ProcessorInterface
      */
     public function process(array $ipnData)
     {
-        $details = $this->amazonCaptureDetailsFactory->create([
+        $details = $this->amazonCaptureDetailsFactory->create(
+            [
             'details' => $ipnData['CaptureDetails']
-        ]);
+            ]
+        );
 
         $collection = $this->collectionFactory
             ->create()

@@ -33,11 +33,16 @@ define(
 
             redirectOnSuccess = redirectOnSuccess !== false;
 
-            /** Checkout for guest and registered customer. */
+            /**
+    * 
+    * Checkout for guest and registered customer. 
+    */
             if (!customer.isLoggedIn()) {
-                serviceUrl = urlBuilder.createUrl('/guest-carts/:quoteId/payment-information', {
-                    quoteId: quote.getQuoteId()
-                });
+                serviceUrl = urlBuilder.createUrl(
+                    '/guest-carts/:quoteId/payment-information', {
+                        quoteId: quote.getQuoteId()
+                    }
+                );
                 payload = {
                     cartId: quote.getQuoteId(),
                     email: quote.guestEmail,
@@ -74,3 +79,4 @@ define(
         };
     }
 );
+

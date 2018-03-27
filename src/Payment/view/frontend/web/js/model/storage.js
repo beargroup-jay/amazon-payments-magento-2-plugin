@@ -42,19 +42,25 @@ define(
             isShippingMethodsLoading = ko.observable(false),
             isAmazonShippingAddressSelected = ko.observable(false),
             isQuoteDirty = ko.observable(amazonPaymentConfig.getValue('isQuoteDirty')),
-            isPwaVisible = ko.computed(function () {
-                return isAmazonEnabled() && !isQuoteDirty();
-            }),
-            isAmazonCartInValid = ko.computed(function () {
-                return isAmazonAccountLoggedIn() && isQuoteDirty();
-            }),
+            isPwaVisible = ko.computed(
+                function () {
+                    return isAmazonEnabled() && !isQuoteDirty();
+                }
+            ),
+            isAmazonCartInValid = ko.computed(
+                function () {
+                    return isAmazonAccountLoggedIn() && isQuoteDirty();
+                }
+            ),
             isLoginRedirectPage = $('body').hasClass('amazon-login-login-processauthhash');
 
         /**
          * Subscribes to amazonDefined observable which runs when amazon object becomes available
+         *
          * @param {String} amazonDefined
          */
-        function checkAmazonDefined(amazonDefined) {
+        function checkAmazonDefined(amazonDefined) 
+        {
             if (amazonDefined && !isLoginRedirectPage) {
                 verifyAmazonLoggedIn(); //eslint-disable-line no-use-before-define
                 //remove subscription to amazonDefined once loaded
@@ -65,7 +71,8 @@ define(
         /**
          * Log out amazon user
          */
-        function amazonLogOut() {
+        function amazonLogOut() 
+        {
             if (amazonCore.amazonDefined()) {
                 amazon.Login.logout(); // eslint-disable-line no-undef
             }
@@ -75,19 +82,25 @@ define(
         /**
          * Set login error if logged out
          */
-        function setAmazonLoggedOutIfLoginError(isLoggedOut) {
+        function setAmazonLoggedOutIfLoginError(isLoggedOut) 
+        {
             if (isLoggedOut === true) {
                 isAmazonAccountLoggedIn(false);
                 amazonLoginError.dispose();
             }
         }
 
-        /** if Amazon cart contents are invalid log user out **/
-        isAmazonCartInValid.subscribe(function (isCartInValid) {
-            if (isCartInValid) {
-                amazonLogOut();
+        /**
+    * 
+    * if Amazon cart contents are invalid log user out 
+    **/
+        isAmazonCartInValid.subscribe(
+            function (isCartInValid) {
+                if (isCartInValid) {
+                    amazonLogOut();
+                }
             }
-        });
+        );
 
         //run this on loading storage model. If not defined subscribe will trigger when true
         checkAmazonDefined(amazonCore.amazonDefined());
@@ -96,12 +109,15 @@ define(
         /**
          * Verifies amazon user is logged in
          */
-        function verifyAmazonLoggedIn() {
-            amazonCore.verifyAmazonLoggedIn().then(function (response) {
-                if (!amazonCore.amazonLoginError()) {
-                    isAmazonAccountLoggedIn(response);
+        function verifyAmazonLoggedIn() 
+        {
+            amazonCore.verifyAmazonLoggedIn().then(
+                function (response) {
+                    if (!amazonCore.amazonLoginError()) {
+                        isAmazonAccountLoggedIn(response);
+                    }
                 }
-            });
+            );
         }
 
         return {
@@ -139,3 +155,4 @@ define(
         };
     }
 );
+

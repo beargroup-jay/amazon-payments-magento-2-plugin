@@ -48,11 +48,12 @@ class Validator implements ValidatorInterface
 
     /**
      * Validator constructor.
-     * @param \Amazon\Payment\Gateway\Config\Config $amazonConfig
-     * @param \Magento\Framework\Registry $registry
+     *
+     * @param \Amazon\Payment\Gateway\Config\Config               $amazonConfig
+     * @param \Magento\Framework\Registry                         $registry
      * @param \Magento\Catalog\Model\ProductTypes\ConfigInterface $productTypeConfig
-     * @param \Magento\Payment\Helper\Data $paymentData
-     * @param \Amazon\Core\Helper\CategoryExclusion $categoryExclusionHelper
+     * @param \Magento\Payment\Helper\Data                        $paymentData
+     * @param \Amazon\Core\Helper\CategoryExclusion               $categoryExclusionHelper
      */
     public function __construct(
         \Amazon\Payment\Gateway\Config\Config $amazonConfig,
@@ -71,8 +72,8 @@ class Validator implements ValidatorInterface
     /**
      * Validates shortcut
      *
-     * @param string $code
-     * @param bool $isInCatalog
+     * @param  string $code
+     * @param  bool   $isInCatalog
      * @return bool
      */
     public function validate($code, $isInCatalog)
@@ -85,8 +86,8 @@ class Validator implements ValidatorInterface
     /**
      * Checks visibility of context (cart or product page)
      *
-     * @param string $paymentCode Payment method code
-     * @param bool $isInCatalog
+     * @param  string $paymentCode Payment method code
+     * @param  bool   $isInCatalog
      * @return bool
      */
     public function isContextAvailable($paymentCode, $isInCatalog)
@@ -97,11 +98,13 @@ class Validator implements ValidatorInterface
         if ($isInCatalog && $this->amazonConfig->getValue('pwa_pp_button_is_visible')) {
             $currentProduct = $this->registry->registry('current_product');
             if ($currentProduct !== null) {
-                if ($this->categoryExclusionHelper->productHasExcludedCategory($currentProduct))
+                if ($this->categoryExclusionHelper->productHasExcludedCategory($currentProduct)) {
                     return false;
+                }
             } else {
-                if ($this->categoryExclusionHelper->isQuoteDirty())
+                if ($this->categoryExclusionHelper->isQuoteDirty()) {
                     return false;
+                }
             }
             return true;
         }
@@ -111,14 +114,18 @@ class Validator implements ValidatorInterface
     /**
      * Check is product available depending on final price or type set(configurable)
      *
-     * @param bool $isInCatalog
+     * @param  bool $isInCatalog
      * @return bool
      */
     public function isPriceOrSetAvailable($isInCatalog)
     {
         if ($isInCatalog) {
             // Show PayPal shortcut on a product view page only if product has nonzero price
-            /** @var $currentProduct \Magento\Catalog\Model\Product */
+            /**
+* 
+             *
+ * @var $currentProduct \Magento\Catalog\Model\Product 
+*/
             $currentProduct = $this->registry->registry('current_product');
             if ($currentProduct !== null) {
                 $productPrice = (double)$currentProduct->getFinalPrice();
@@ -137,13 +144,17 @@ class Validator implements ValidatorInterface
     /**
      * Checks payment method and quote availability
      *
-     * @param string $paymentCode
+     * @param  string $paymentCode
      * @return bool
      */
     public function isMethodAvailable($paymentCode)
     {
         // check payment method availability
-        /** @var \Magento\Payment\Model\Method\AbstractMethod $methodInstance */
+        /**
+* 
+         *
+ * @var \Magento\Payment\Model\Method\AbstractMethod $methodInstance 
+*/
         $methodInstance = $this->paymentData->getMethodInstance($paymentCode);
         if (!$methodInstance->isAvailable()) {
             return false;

@@ -93,7 +93,8 @@ class CaptureStrategyCommand implements CommandInterface
 
     /**
      * Get execution command name
-     * @param OrderPaymentInterface $payment
+     *
+     * @param  OrderPaymentInterface $payment
      * @return string
      */
     private function getCommand(OrderPaymentInterface $payment)
@@ -129,10 +130,11 @@ class CaptureStrategyCommand implements CommandInterface
     /**
      * Check if auth transaction exists
      *
-     * @param OrderPaymentInterface $payment
+     * @param  OrderPaymentInterface $payment
      * @return boolean
      */
-    private function isAuthorized(OrderPaymentInterface $payment) {
+    private function isAuthorized(OrderPaymentInterface $payment) 
+    {
         $filters = [];
         $this->filterBuilder->setField('transaction_id')
             ->setValue($payment->getLastTransId())
@@ -154,7 +156,7 @@ class CaptureStrategyCommand implements CommandInterface
     /**
      * Check if capture transaction already exists
      *
-     * @param OrderPaymentInterface $payment
+     * @param  OrderPaymentInterface $payment
      * @return bool
      */
     private function captureTransactionExists(OrderPaymentInterface $payment)

@@ -71,9 +71,11 @@ class OrderProcessor implements ProcessorInterface
      */
     public function process(array $ipnData)
     {
-        $details = $this->amazonOrderDetailsFactory->create([
+        $details = $this->amazonOrderDetailsFactory->create(
+            [
             'details' => $ipnData['OrderReference']
-        ]);
+            ]
+        );
 
         $collection = $this->collectionFactory
             ->create()

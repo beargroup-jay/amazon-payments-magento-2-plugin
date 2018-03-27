@@ -33,7 +33,7 @@ class QuoteLinkManagement implements QuoteLinkManagementInterface
     private $quoteLinkFactory;
 
     /**
-     * @param CartExtensionFactory $cartExtensionFactory
+     * @param CartExtensionFactory      $cartExtensionFactory
      * @param QuoteLinkInterfaceFactory $quoteLinkFactory
      */
     public function __construct(

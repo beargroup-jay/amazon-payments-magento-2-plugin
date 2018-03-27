@@ -32,7 +32,7 @@ class AmazonRefundDetails
 
     /**
      * @param AmazonRefundStatusFactory $amazonRefundStatusFactory
-     * @param array $details
+     * @param array                     $details
      */
     public function __construct(
         AmazonRefundStatusFactory $amazonRefundStatusFactory,
@@ -40,10 +40,12 @@ class AmazonRefundDetails
     ) {
         $statusData = $details['RefundStatus'];
 
-        $this->refundStatus = $amazonRefundStatusFactory->create([
+        $this->refundStatus = $amazonRefundStatusFactory->create(
+            [
             'state'      => $statusData['State'],
             'reasonCode' => isset($statusData['ReasonCode']) ? $statusData['ReasonCode'] : null
-        ]);
+            ]
+        );
 
         if (isset($details['AmazonRefundId'])) {
             $this->refundId = $details['AmazonRefundId'];

@@ -53,10 +53,11 @@ class AuthorizationRequest implements BuilderInterface
 
     /**
      * AuthorizationRequest constructor.
-     * @param ConfigInterface $config
-     * @param ProductMetadata $productMetadata
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
+     *
+     * @param ConfigInterface  $config
+     * @param ProductMetadata  $productMetadata
+     * @param SubjectReader    $subjectReader
+     * @param Data             $coreHelper
      * @param ManagerInterface $eventManager
      */
     public function __construct(
@@ -65,8 +66,7 @@ class AuthorizationRequest implements BuilderInterface
         SubjectReader $subjectReader,
         Data $coreHelper,
         ManagerInterface $eventManager
-    )
-    {
+    ) {
         $this->config = $config;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
@@ -76,7 +76,7 @@ class AuthorizationRequest implements BuilderInterface
     /**
      * Builds ENV request
      *
-     * @param array $buildSubject
+     * @param  array $buildSubject
      * @return array
      */
     public function build(array $buildSubject)

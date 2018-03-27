@@ -20,6 +20,7 @@ use Amazon\Core\Exception\AmazonServiceUnavailableException;
 
 /**
  * Class VoidClient
+ *
  * @package Amazon\Payment\Gateway\Http\Client
  */
 class VoidClient extends AbstractClient

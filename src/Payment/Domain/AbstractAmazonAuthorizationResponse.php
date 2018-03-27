@@ -45,9 +45,11 @@ abstract class AbstractAmazonAuthorizationResponse
 
         $details = $data[$this->getResultKey()]['AuthorizationDetails'];
 
-        $this->details = $amazonAuthorizationDetailsFactory->create([
+        $this->details = $amazonAuthorizationDetailsFactory->create(
+            [
             'details' => $details
-        ]);
+            ]
+        );
     }
 
     /**

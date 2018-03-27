@@ -97,7 +97,7 @@ require(['uiRegistry', "prototype"], function(registry){
     // Show/hide fields
     if ($('payment_'+co+'_amazon_payment_credentials_merchant_id') != null) {
         if ($('payment_'+co+'_amazon_payment_credentials_merchant_id').value) {
-            amazonSpBack.show();
+            amazonSpBack.setStyle({'display':'block'});
             amazonSimplepath.hide();
 
             if (window.location.hash == '#payment_amazon_payments-head') {
@@ -197,8 +197,8 @@ require(['uiRegistry', "prototype"], function(registry){
     // User is skipping simplepath
     amazonSimplepath.select('#simplepath-skip')[0].observe('click', function(e) {
         e.stop();
-        amazonSpBack.show();
         showAmazonConfig();
+        amazonSpBack.setStyle({'display':'block'});
     });
 
     // User clicked 'Back'

@@ -25,6 +25,7 @@ use Amazon\Payment\Api\Data\PendingRefundInterfaceFactory;
 
 /**
  * Class RefundHandler
+ *
  * @package Amazon\Payment\Gateway\Response
  */
 class RefundHandler implements HandlerInterface
@@ -58,10 +59,11 @@ class RefundHandler implements HandlerInterface
 
     /**
      * RefundHandler constructor.
-     * @param Logger $logger
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
-     * @param ManagerInterface $messageManager
+     *
+     * @param Logger                        $logger
+     * @param SubjectReader                 $subjectReader
+     * @param Data                          $coreHelper
+     * @param ManagerInterface              $messageManager
      * @param PendingRefundInterfaceFactory $pendingRefundFactory
      */
     public function __construct(
@@ -70,8 +72,7 @@ class RefundHandler implements HandlerInterface
         Data $coreHelper,
         ManagerInterface $messageManager,
         PendingRefundInterfaceFactory $pendingRefundFactory
-    )
-    {
+    ) {
         $this->logger = $logger;
         $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;
@@ -105,7 +106,7 @@ class RefundHandler implements HandlerInterface
                     ->save();
             }
 
-            $this->messageManager->addSuccessMessage( __('Amazon Payment refund successful.'));
+            $this->messageManager->addSuccessMessage(__('Amazon Payment refund successful.'));
         }
     }
 

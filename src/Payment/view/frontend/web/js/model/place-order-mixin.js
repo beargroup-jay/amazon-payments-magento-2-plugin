@@ -14,22 +14,31 @@
  */
 /*jshint browser:true jquery:true*/
 /*global alert*/
-define([
+define(
+    [
     'jquery',
     'mage/utils/wrapper',
     'Magento_CheckoutAgreements/js/model/agreements-assigner'
-], function ($, wrapper, agreementsAssigner) {
-    'use strict';
+    ], function ($, wrapper, agreementsAssigner) {
+        'use strict';
 
-    return function (placeOrderAction) {
+        return function (placeOrderAction) {
 
-        /** Override default place order action and add agreement_ids to request */
-        return wrapper.wrap(placeOrderAction, function (originalAction, paymentData,
-            redirectOnSuccess, messageContainer) {
+            /**
+    * 
+    * Override default place order action and add agreement_ids to request 
+    */
+            return wrapper.wrap(
+                placeOrderAction, function (originalAction, paymentData,
+                    redirectOnSuccess, messageContainer
+                ) {
 
-            agreementsAssigner(paymentData);
+                    agreementsAssigner(paymentData);
 
-            return originalAction(paymentData, redirectOnSuccess, messageContainer);
-        });
-    };
-});
+                    return originalAction(paymentData, redirectOnSuccess, messageContainer);
+                }
+            );
+        };
+    }
+);
+

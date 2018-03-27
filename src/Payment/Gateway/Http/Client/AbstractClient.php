@@ -31,6 +31,7 @@ use Amazon\Payment\Api\Data\PendingCaptureInterfaceFactory;
 
 /**
  * Class AbstractClient
+ *
  * @package Amazon\Payment\Gateway\Http\Client
  */
 abstract class AbstractClient implements ClientInterface
@@ -86,15 +87,16 @@ abstract class AbstractClient implements ClientInterface
 
     /**
      * AbstractClient constructor.
-     * @param Logger $logger
-     * @param ClientFactoryInterface $clientFactory
-     * @param SubjectReader $subjectReader
+     *
+     * @param Logger                               $logger
+     * @param ClientFactoryInterface               $clientFactory
+     * @param SubjectReader                        $subjectReader
      * @param AmazonSetOrderDetailsResponseFactory $amazonSetOrderDetailsResponseFactory
-     * @param AmazonAuthorizationResponseFactory $amazonAuthorizationResponseFactory
-     * @param AmazonCaptureResponseFactory $amazonCaptureResponseFactory
-     * @param PendingCaptureInterfaceFactory $pendingCaptureFactory
+     * @param AmazonAuthorizationResponseFactory   $amazonAuthorizationResponseFactory
+     * @param AmazonCaptureResponseFactory         $amazonCaptureResponseFactory
+     * @param PendingCaptureInterfaceFactory       $pendingCaptureFactory
      * @param PendingAuthorizationInterfaceFactory $pendingAuthorizationFactory
-     * @param Data $coreHelper
+     * @param Data                                 $coreHelper
      */
     public function __construct(
         Logger $logger,
@@ -106,8 +108,7 @@ abstract class AbstractClient implements ClientInterface
         PendingCaptureInterfaceFactory $pendingCaptureFactory,
         PendingAuthorizationInterfaceFactory $pendingAuthorizationFactory,
         Data $coreHelper
-    )
-    {
+    ) {
         $this->subjectReader = $subjectReader;
         $this->clientFactory = $clientFactory;
         $this->logger = $logger;
@@ -152,19 +153,23 @@ abstract class AbstractClient implements ClientInterface
 
     /**
      * Sets Amazon payment order data
-     * @param $storeId
-     * @param $data
+     *
+     * @param  $storeId
+     * @param  $data
      * @return array
      * @throws AmazonServiceUnavailableException
      */
-    protected function setOrderReferenceDetails($storeId, $data) {
+    protected function setOrderReferenceDetails($storeId, $data) 
+    {
         $response = [];
 
         try {
             $responseParser = $this->clientFactory->create($storeId)->setOrderReferenceDetails($data);
-            $constraints = $this->amazonSetOrderDetailsResponseFactory->create([
+            $constraints = $this->amazonSetOrderDetailsResponseFactory->create(
+                [
                 'response' => $responseParser
-            ]);
+                ]
+            );
 
             $response = [
                 'status' => $responseParser->response['Status'],
@@ -181,8 +186,9 @@ abstract class AbstractClient implements ClientInterface
 
     /**
      * Confirms that payment has been created for Amazon Pay
-     * @param $storeId
-     * @param $amazonOrderReferenceId
+     *
+     * @param  $storeId
+     * @param  $amazonOrderReferenceId
      * @return array
      * @throws AmazonServiceUnavailableException
      */
@@ -210,7 +216,8 @@ abstract class AbstractClient implements ClientInterface
      * @return mixed
      * @throws AmazonServiceUnavailableException
      */
-    protected function getAuthorization($storeId, $data) {
+    protected function getAuthorization($storeId, $data) 
+    {
         $response = null;
         try {
             $client = $this->clientFactory->create($storeId);
@@ -228,12 +235,14 @@ abstract class AbstractClient implements ClientInterface
 
     /**
      * Performs authorization or authorization and capture based on captureNow parameter
-     * @param $data
-     * @param bool $captureNow
+     *
+     * @param  $data
+     * @param  bool $captureNow
      * @return array
      * @throws AmazonServiceUnavailableException
      */
-    protected function authorize($data, $captureNow = false) {
+    protected function authorize($data, $captureNow = false) 
+    {
         $response = [];
 
         $storeId = $this->subjectReader->getStoreId();
@@ -337,6 +346,7 @@ abstract class AbstractClient implements ClientInterface
 
     /**
      * Process http request
+     *
      * @param array $data
      */
     abstract protected function process(array $data);

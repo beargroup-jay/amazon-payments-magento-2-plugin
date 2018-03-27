@@ -24,7 +24,7 @@ class AmazonRefund
     /**
      * Validate AmazonRefundResponse
      *
-     * @param  AmazonRefundDetails $details
+     * @param AmazonRefundDetails $details
      *
      * @return bool
      * @throws StateException
@@ -34,9 +34,9 @@ class AmazonRefund
         $status = $details->getRefundStatus();
 
         switch ($status->getState()) {
-            case AmazonRefundStatus::STATE_COMPLETED:
-            case AmazonRefundStatus::STATE_PENDING:
-                return true;
+        case AmazonRefundStatus::STATE_COMPLETED:
+        case AmazonRefundStatus::STATE_PENDING:
+            return true;
         }
 
         throw new StateException(

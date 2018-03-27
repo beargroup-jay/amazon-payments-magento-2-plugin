@@ -134,9 +134,11 @@ class QueuedRefundUpdater
                 $this->storeManager->setCurrentStore($storeId);
 
                 if (null === $refundDetails) {
-                    $responseParser = $this->amazonHttpClientFactory->create($storeId)->getRefundDetails([
+                    $responseParser = $this->amazonHttpClientFactory->create($storeId)->getRefundDetails(
+                        [
                         'amazon_refund_id' => $pendingRefund->getRefundId()
-                    ]);
+                        ]
+                    );
 
                     $response      = $this->amazonRefundDetailsResponseFactory->create(['response' => $responseParser]);
                     $refundDetails = $response->getDetails();
@@ -145,13 +147,13 @@ class QueuedRefundUpdater
                 $status = $refundDetails->getRefundStatus();
 
                 switch ($status->getState()) {
-                    case AmazonRefundStatus::STATE_COMPLETED:
-                        $pendingRefund->delete();
-                        break;
-                    case AmazonRefundStatus::STATE_DECLINED:
-                        $this->triggerAdminNotificationForDeclinedRefund($pendingRefund);
-                        $pendingRefund->delete();
-                        break;
+                case AmazonRefundStatus::STATE_COMPLETED:
+                    $pendingRefund->delete();
+                    break;
+                case AmazonRefundStatus::STATE_DECLINED:
+                    $this->triggerAdminNotificationForDeclinedRefund($pendingRefund);
+                    $pendingRefund->delete();
+                    break;
                 }
             }
 

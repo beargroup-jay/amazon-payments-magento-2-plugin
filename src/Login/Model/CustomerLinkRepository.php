@@ -68,13 +68,13 @@ class CustomerLinkRepository implements CustomerLinkRepositoryInterface
     private $collectionProcessor;
 
     /**
-     * @param CustomerLinkResourceModel $customerLinkFactory
-     * @param CustomerLinkFactory $resourceModel
-     * @param FilterBuilder $filterBuilder
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param CustomerLinkResourceModel                 $customerLinkFactory
+     * @param CustomerLinkFactory                       $resourceModel
+     * @param FilterBuilder                             $filterBuilder
+     * @param SearchCriteriaBuilder                     $searchCriteriaBuilder
      * @param PaymentTokenSearchResultsInterfaceFactory $searchResultsFactory
-     * @param CollectionFactory $collectionFactory
-     * @param CollectionProcessorInterface | null $collectionProcessor
+     * @param CollectionFactory                         $collectionFactory
+     * @param CollectionProcessorInterface | null       $collectionProcessor
      */
     public function __construct(
         CustomerLinkResourceModel $resourceModel,

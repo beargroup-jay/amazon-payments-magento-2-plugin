@@ -39,10 +39,10 @@ class AmazonAddressFactory
 
     /**
      * @param ObjectManagerInterface $objectManager
-     * @param AmazonNameFactory $amazonNameFactory
-     * @param array $addressDecoratorPool Per-country custom decorators of incoming address data.
-     *                                         The key as an "ISO 3166-1 alpha-2" country code and
-     *                                         the value as an FQCN of a child of AmazonAddress.
+     * @param AmazonNameFactory      $amazonNameFactory
+     * @param array                  $addressDecoratorPool Per-country custom decorators of incoming address data.
+     *                                                     The key as an "ISO 3166-1 alpha-2" country code and the
+     *                                                     value as an FQCN of a child of AmazonAddress.
      */
     public function __construct(
         ObjectManagerInterface $objectManager,
@@ -107,7 +107,7 @@ class AmazonAddressFactory
     /**
      * Returns address lines.
      *
-     * @param array $responseData
+     * @param  array $responseData
      * @return array
      */
     private function getLines(array $responseData = []): array

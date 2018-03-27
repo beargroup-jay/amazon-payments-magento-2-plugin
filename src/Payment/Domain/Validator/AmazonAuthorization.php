@@ -37,17 +37,17 @@ class AmazonAuthorization
         $status = $details->getStatus();
 
         switch ($status->getState()) {
-            case AmazonAuthorizationStatus::STATE_CLOSED:
-                switch ($status->getReasonCode()) {
-                    case AmazonAuthorizationStatus::REASON_MAX_CAPTURES_PROCESSED:
-                        return true;
-                }
-                break;
-            case AmazonAuthorizationStatus::STATE_OPEN:
-            case AmazonAuthorizationStatus::STATE_PENDING:
+        case AmazonAuthorizationStatus::STATE_CLOSED:
+            switch ($status->getReasonCode()) {
+            case AmazonAuthorizationStatus::REASON_MAX_CAPTURES_PROCESSED:
                 return true;
-            case AmazonAuthorizationStatus::STATE_DECLINED:
-                $this->throwDeclinedExceptionForStatus($status);
+            }
+            break;
+        case AmazonAuthorizationStatus::STATE_OPEN:
+        case AmazonAuthorizationStatus::STATE_PENDING:
+            return true;
+        case AmazonAuthorizationStatus::STATE_DECLINED:
+            $this->throwDeclinedExceptionForStatus($status);
         }
 
         throw new StateException($this->getExceptionMessage($status));
@@ -56,13 +56,13 @@ class AmazonAuthorization
     protected function throwDeclinedExceptionForStatus(AmazonAuthorizationStatus $status)
     {
         switch ($status->getReasonCode()) {
-            case AmazonAuthorizationStatus::REASON_TRANSACTION_TIMEOUT:
-                throw new TransactionTimeoutException($this->getExceptionMessage($status));
-            case AmazonAuthorizationStatus::REASON_AMAZON_REJECTED:
-            case AmazonAuthorizationStatus::REASON_PROCESSING_FAILURE:
-                throw new HardDeclineException($this->getExceptionMessage($status));
-            case AmazonAuthorizationStatus::REASON_INVALID_PAYMENT_METHOD:
-                throw new SoftDeclineException($this->getExceptionMessage($status));
+        case AmazonAuthorizationStatus::REASON_TRANSACTION_TIMEOUT:
+            throw new TransactionTimeoutException($this->getExceptionMessage($status));
+        case AmazonAuthorizationStatus::REASON_AMAZON_REJECTED:
+        case AmazonAuthorizationStatus::REASON_PROCESSING_FAILURE:
+            throw new HardDeclineException($this->getExceptionMessage($status));
+        case AmazonAuthorizationStatus::REASON_INVALID_PAYMENT_METHOD:
+            throw new SoftDeclineException($this->getExceptionMessage($status));
         }
     }
 

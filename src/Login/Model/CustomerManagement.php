@@ -38,7 +38,7 @@ class CustomerManagement implements \Amazon\Login\Api\CustomerManagementInterfac
 
     /**
      * @param CustomerLinkRepositoryInterface $customerLinkRepository
-     * @param CustomerExtensionFactory $customerExtensionFactory
+     * @param CustomerExtensionFactory        $customerExtensionFactory
      */
     public function __construct(
         CustomerLinkManagementInterface $customerLinkManagement,

@@ -26,8 +26,8 @@ class JsOrigin extends BaseField
     /**
      * Render element value
      *
-     * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
-     * @return string
+     * @param                                         \Magento\Framework\Data\Form\Element\AbstractElement $element
+     * @return                                        string
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function _renderValue(AbstractElement $element)
@@ -55,8 +55,8 @@ class JsOrigin extends BaseField
     /**
      * Render element value
      *
-     * @param \Magento\Framework\Data\Form\Element\AbstractElement $element
-     * @return string
+     * @param                                         \Magento\Framework\Data\Form\Element\AbstractElement $element
+     * @return                                        string
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function _renderInheritCheckbox(AbstractElement $element)

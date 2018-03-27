@@ -47,9 +47,10 @@ class VoidRequest implements BuilderInterface
 
     /**
      * VoidRequest constructor.
-     * @param ProductMetadata $productMetadata
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
+     *
+     * @param ProductMetadata          $productMetadata
+     * @param SubjectReader            $subjectReader
+     * @param Data                     $coreHelper
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
@@ -57,8 +58,7 @@ class VoidRequest implements BuilderInterface
         SubjectReader $subjectReader,
         Data $coreHelper,
         OrderRepositoryInterface $orderRepository
-    )
-    {
+    ) {
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->subjectReader = $subjectReader;
@@ -68,7 +68,7 @@ class VoidRequest implements BuilderInterface
     /**
      * Builds ENV request
      *
-     * @param array $buildSubject
+     * @param  array $buildSubject
      * @return array
      */
     public function build(array $buildSubject)

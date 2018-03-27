@@ -48,9 +48,10 @@ class VoidHandler implements HandlerInterface
 
     /**
      * RefundHandler constructor.
-     * @param Logger $logger
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
+     *
+     * @param Logger         $logger
+     * @param SubjectReader  $subjectReader
+     * @param Data           $coreHelper
      * @param $messageManager
      */
     public function __construct(
@@ -58,8 +59,7 @@ class VoidHandler implements HandlerInterface
         SubjectReader $subjectReader,
         Data $coreHelper,
         ManagerInterface $messageManager
-    )
-    {
+    ) {
         $this->logger = $logger;
         $this->subjectReader = $subjectReader;
         $this->coreHelper = $coreHelper;

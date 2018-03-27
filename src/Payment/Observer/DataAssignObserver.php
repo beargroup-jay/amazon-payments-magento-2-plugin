@@ -20,7 +20,8 @@ use Magento\Payment\Observer\AbstractDataAssignObserver;
 use Magento\Quote\Api\Data\PaymentInterface;
 use Amazon\Payment\Plugin\AdditionalInformation;
 
-class DataAssignObserver extends AbstractDataAssignObserver {
+class DataAssignObserver extends AbstractDataAssignObserver
+{
 
     /**
      * @var array

@@ -49,10 +49,12 @@ class AmazonAuthorizationDetails
     public function __construct(AmazonAuthorizationStatusFactory $amazonAuthorizationStatusFactory, array $details)
     {
         $status       = $details['AuthorizationStatus'];
-        $this->status = $amazonAuthorizationStatusFactory->create([
+        $this->status = $amazonAuthorizationStatusFactory->create(
+            [
             'state'      => $status['State'],
             'reasonCode' => (isset($status['ReasonCode']) ? $status['ReasonCode'] : null)
-        ]);
+            ]
+        );
 
         if (isset($details['IdList']['member'])) {
             $this->captureTransactionId = $details['IdList']['member'];

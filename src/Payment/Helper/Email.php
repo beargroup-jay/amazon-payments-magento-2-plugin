@@ -81,7 +81,7 @@ class Email extends AbstractHelper
 
         $vars = [
             'amazonAccountUrl' => $this->amazonCoreHelper
-                                       ->getAmazonAccountUrlByPaymentRegion($paymentRegionByOrderStore),
+                ->getAmazonAccountUrlByPaymentRegion($paymentRegionByOrderStore),
             'storeName' => $storeName,
         ];
 

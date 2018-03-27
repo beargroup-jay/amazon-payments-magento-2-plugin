@@ -51,15 +51,14 @@ class SubjectReader
     /**
      * SubjectReader constructor.
      *
-     * @param Session $checkoutSession
+     * @param Session                   $checkoutSession
      * @param QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory
      */
     public function __construct(
         Session $checkoutSession,
         QuoteLinkInterfaceFactory $quoteLinkInterfaceFactory,
         Data $coreHelper
-    )
-    {
+    ) {
         $this->quoteLinkFactory = $quoteLinkInterfaceFactory;
         $this->checkoutSession = $checkoutSession;
         $this->coreHelper = $coreHelper;
@@ -69,7 +68,7 @@ class SubjectReader
     /**
      * Reads payment from subject
      *
-     * @param array $subject
+     * @param  array $subject
      * @return PaymentDataObjectInterface
      */
     public function readPayment(array $subject)
@@ -81,7 +80,7 @@ class SubjectReader
     /**
      * Reads amount from subject
      *
-     * @param array $subject
+     * @param  array $subject
      * @return mixed
      */
     public function readAmount(array $subject)
@@ -91,6 +90,7 @@ class SubjectReader
 
     /**
      * Gets quote from current checkout session and returns store ID
+     *
      * @return int
      */
     public function getStoreId()
@@ -102,6 +102,7 @@ class SubjectReader
 
     /**
      * Get unique Amazon ID for order from custom table
+     *
      * @return mixed
      */
     public function getAmazonId()
@@ -142,7 +143,8 @@ class SubjectReader
      *
      * @param $message
      */
-    public function setOrderMessage($message) {
+    public function setOrderMessage($message) 
+    {
         $order = $this->getOrder();
         if ($order) {
             $order->addStatusHistoryComment($message);
@@ -152,7 +154,8 @@ class SubjectReader
     /**
      * @return \Magento\Sales\Model\Order
      */
-    public function getOrder() {
+    public function getOrder() 
+    {
         return $this->checkoutSession->getLastRealOrder();
     }
 

@@ -33,7 +33,7 @@ class JsonConfigDataValidator extends AbstractValidator
 
     /**
      * @param DecoderInterface $jsonDecoder
-     * @param Data $amazonCoreHelper
+     * @param Data             $amazonCoreHelper
      */
     public function __construct(
         Data $amazonCoreHelper,

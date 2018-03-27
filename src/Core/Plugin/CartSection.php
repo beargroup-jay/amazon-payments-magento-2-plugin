@@ -33,7 +33,7 @@ class CartSection
 
     /**
      * @param CategoryExclusion $categoryExclusionHelper
-     * @param Data $coreHelper
+     * @param Data              $coreHelper
      */
     public function __construct(
         CategoryExclusion $categoryExclusionHelper,

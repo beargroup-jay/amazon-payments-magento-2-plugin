@@ -43,22 +43,22 @@ class AmazonAddressDecoratorDe implements AmazonAddressInterface
 
         $lines = [];
         switch (true) {
-            case !empty($line3):
-                $lines = [$line3];
-                $firstTwoLines = $line1 . ' ' . $line2;
-                if ($this->isPOBox($line1, $firstTwoLines)) {
-                    $lines[] = $firstTwoLines;
-                }
-                break;
-            case !empty($line2):
-                $lines = [$line2];
-                if ($this->isPOBox($line1, $line1)) {
-                    $lines[] = $line1;
-                }
-                break;
-            case !empty($line1):
-                $lines = [$line1];
-                break;
+        case !empty($line3):
+            $lines = [$line3];
+            $firstTwoLines = $line1 . ' ' . $line2;
+            if ($this->isPOBox($line1, $firstTwoLines)) {
+                $lines[] = $firstTwoLines;
+            }
+            break;
+        case !empty($line2):
+            $lines = [$line2];
+            if ($this->isPOBox($line1, $line1)) {
+                $lines[] = $line1;
+            }
+            break;
+        case !empty($line1):
+            $lines = [$line1];
+            break;
         }
 
         return $lines;
@@ -75,17 +75,17 @@ class AmazonAddressDecoratorDe implements AmazonAddressInterface
 
         $company = $this->amazonAddress->getCompany();
         switch (true) {
-            case !empty($line3):
-                $firstTwoLines = $line1 . ' ' . $line2;
-                if (!$this->isPOBox($line1, $firstTwoLines)) {
-                    $company = $firstTwoLines;
-                }
-                break;
-            case !empty($line2):
-                if (!$this->isPOBox($line1, $line1)) {
-                    $company = $line1;
-                }
-                break;
+        case !empty($line3):
+            $firstTwoLines = $line1 . ' ' . $line2;
+            if (!$this->isPOBox($line1, $firstTwoLines)) {
+                $company = $firstTwoLines;
+            }
+            break;
+        case !empty($line2):
+            if (!$this->isPOBox($line1, $line1)) {
+                $company = $line1;
+            }
+            break;
         }
 
         return $company;
@@ -150,8 +150,8 @@ class AmazonAddressDecoratorDe implements AmazonAddressInterface
     /**
      * Returns true if strings contain address.
      *
-     * @param string $line1
-     * @param string $line2
+     * @param  string $line1
+     * @param  string $line2
      * @return bool
      */
     private function isPOBox($line1, $line2)

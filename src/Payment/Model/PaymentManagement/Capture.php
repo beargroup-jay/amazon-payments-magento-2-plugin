@@ -95,19 +95,19 @@ class Capture extends AbstractOperation
     /**
      * Capture constructor.
      *
-     * @param NotifierInterface                   $notifier
-     * @param UrlInterface                        $urlBuilder
-     * @param SearchCriteriaBuilderFactory        $searchCriteriaBuilderFactory
-     * @param InvoiceRepositoryInterface          $invoiceRepository
-     * @param ClientFactoryInterface              $clientFactory
-     * @param PendingCaptureInterfaceFactory      $pendingCaptureFactory
-     * @param AmazonCaptureDetailsResponseFactory $amazonCaptureDetailsResponseFactory
-     * @param OrderPaymentRepositoryInterface     $orderPaymentRepository
-     * @param OrderRepositoryInterface            $orderRepository
-     * @param TransactionRepositoryInterface      $transactionRepository
-     * @param StoreManagerInterface               $storeManager
-     * @param PaymentManagement                   $paymentManagement
-     * @param LoggerInterface                     $logger
+     * @param                                          NotifierInterface                   $notifier
+     * @param                                          UrlInterface                        $urlBuilder
+     * @param                                          SearchCriteriaBuilderFactory        $searchCriteriaBuilderFactory
+     * @param                                          InvoiceRepositoryInterface          $invoiceRepository
+     * @param                                          ClientFactoryInterface              $clientFactory
+     * @param                                          PendingCaptureInterfaceFactory      $pendingCaptureFactory
+     * @param                                          AmazonCaptureDetailsResponseFactory $amazonCaptureDetailsResponseFactory
+     * @param                                          OrderPaymentRepositoryInterface     $orderPaymentRepository
+     * @param                                          OrderRepositoryInterface            $orderRepository
+     * @param                                          TransactionRepositoryInterface      $transactionRepository
+     * @param                                          StoreManagerInterface               $storeManager
+     * @param                                          PaymentManagement                   $paymentManagement
+     * @param                                          LoggerInterface                     $logger
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -169,9 +169,11 @@ class Capture extends AbstractOperation
                 $this->storeManager->setCurrentStore($storeId);
 
                 if (null === $captureDetails) {
-                    $responseParser = $this->clientFactory->create($storeId)->getCaptureDetails([
+                    $responseParser = $this->clientFactory->create($storeId)->getCaptureDetails(
+                        [
                         'amazon_capture_id' => $pendingCapture->getCaptureId()
-                    ]);
+                        ]
+                    );
 
                     $response = $this->amazonCaptureDetailsResponseFactory->create(['response' => $responseParser]);
                     $captureDetails = $response->getDetails();
@@ -200,12 +202,12 @@ class Capture extends AbstractOperation
         $status = $details->getStatus();
 
         switch ($status->getState()) {
-            case AmazonCaptureStatus::STATE_COMPLETED:
-                $this->completePendingCapture($pendingCapture, $payment, $order);
-                break;
-            case AmazonCaptureStatus::STATE_DECLINED:
-                $this->declinePendingCapture($pendingCapture, $payment, $order);
-                break;
+        case AmazonCaptureStatus::STATE_COMPLETED:
+            $this->completePendingCapture($pendingCapture, $payment, $order);
+            break;
+        case AmazonCaptureStatus::STATE_DECLINED:
+            $this->declinePendingCapture($pendingCapture, $payment, $order);
+            break;
         }
     }
 

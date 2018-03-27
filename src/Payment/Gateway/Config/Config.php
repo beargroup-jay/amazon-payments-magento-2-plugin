@@ -16,8 +16,8 @@ class Config extends \Magento\Payment\Gateway\Config\Config
     /**
      * Check whether payment method can be used
      *
-     * @param \Magento\Quote\Api\Data\CartInterface|null $quote
-     * @return bool
+     * @param      \Magento\Quote\Api\Data\CartInterface|null $quote
+     * @return     bool
      * @deprecated 100.2.0
      */
     public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)

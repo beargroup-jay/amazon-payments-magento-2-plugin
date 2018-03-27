@@ -24,6 +24,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 
 /**
  * Class RefundRequest
+ *
  * @package Amazon\Payment\Gateway\Request
  */
 class RefundRequest implements BuilderInterface
@@ -51,9 +52,10 @@ class RefundRequest implements BuilderInterface
 
     /**
      * RefundRequest constructor.
-     * @param ProductMetadata $productMetadata
-     * @param SubjectReader $subjectReader
-     * @param Data $coreHelper
+     *
+     * @param ProductMetadata          $productMetadata
+     * @param SubjectReader            $subjectReader
+     * @param Data                     $coreHelper
      * @param OrderRepositoryInterface $orderRepository
      */
     public function __construct(
@@ -61,9 +63,7 @@ class RefundRequest implements BuilderInterface
         SubjectReader $subjectReader,
         Data $coreHelper,
         OrderRepositoryInterface $orderRepository
-
-    )
-    {
+    ) {
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->subjectReader = $subjectReader;

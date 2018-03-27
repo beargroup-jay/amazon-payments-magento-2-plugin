@@ -87,11 +87,12 @@ class Data extends AbstractHelper
 
     /**
      * Data constructor.
-     * @param ModuleListInterface $moduleList
-     * @param Context $context
-     * @param EncryptorInterface $encryptor
+     *
+     * @param ModuleListInterface   $moduleList
+     * @param Context               $context
+     * @param EncryptorInterface    $encryptor
      * @param StoreManagerInterface $storeManager
-     * @param ClientIp $clientIpHelper
+     * @param ClientIp              $clientIpHelper
      */
     public function __construct(
         ModuleListInterface $moduleList,
@@ -644,7 +645,7 @@ class Data extends AbstractHelper
 
     /**
      * @param string $scope
-     * @param null $scopeCode
+     * @param null   $scopeCode
      * @return bool
      */
     public function isPayButtonAvailableInMinicart($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
@@ -654,7 +655,7 @@ class Data extends AbstractHelper
 
     /**
      * @param string $scope
-     * @param null $scopeCode
+     * @param null   $scopeCode
      * @return bool
      */
     public function allowAmLoginLoading($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)

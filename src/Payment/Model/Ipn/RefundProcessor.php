@@ -69,9 +69,11 @@ class RefundProcessor implements ProcessorInterface
      */
     public function process(array $ipnData)
     {
-        $details = $this->amazonRefundDetailsFactory->create([
+        $details = $this->amazonRefundDetailsFactory->create(
+            [
             'details' => $ipnData['RefundDetails']
-        ]);
+            ]
+        );
 
         $collection = $this->collectionFactory
             ->create()

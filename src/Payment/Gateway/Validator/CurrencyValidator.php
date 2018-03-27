@@ -23,6 +23,7 @@ use Amazon\Core\Helper\Data;
 
 /**
  * Class CurrencyValidator
+ *
  * @package Amazon\Payment\Gateway\Validator
  */
 class CurrencyValidator extends AbstractValidator
@@ -40,9 +41,10 @@ class CurrencyValidator extends AbstractValidator
 
     /**
      * CurrencyValidator constructor.
+     *
      * @param ResultInterfaceFactory $resultFactory
-     * @param ConfigInterface $config
-     * @param Data $coreHelper
+     * @param ConfigInterface        $config
+     * @param Data                   $coreHelper
      */
     public function __construct(
         ResultInterfaceFactory $resultFactory,

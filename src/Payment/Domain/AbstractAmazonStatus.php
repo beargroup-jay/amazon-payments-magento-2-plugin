@@ -30,7 +30,7 @@ abstract class AbstractAmazonStatus
     /**
      * AmazonAuthorizationStatus constructor.
      *
-     * @param string $state
+     * @param string      $state
      * @param string|null $reasonCode
      */
     public function __construct($state, $reasonCode = null)

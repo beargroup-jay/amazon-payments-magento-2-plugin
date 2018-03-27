@@ -39,10 +39,11 @@ class AmazonNameFactory
 
     /**
      * @param ObjectManagerInterface $objectManager
-     * @param AmazonNameInterface $amazonName
-     * @param array $perCountryNameHandlers Per-country custom handlers of incoming name data.
-     *                                         The key as an "ISO 3166-1 alpha-2" country code and
-     *                                         the value as an FQCN of a child of AmazonAddress.
+     * @param AmazonNameInterface    $amazonName
+     * @param array                  $perCountryNameHandlers Per-country custom handlers of incoming name data.
+     *                                                       The key as an "ISO 3166-1 alpha-2" country code
+     *                                                       and the value as an FQCN of a child of
+     *                                                       AmazonAddress.
      */
     public function __construct(
         ObjectManagerInterface $objectManager,

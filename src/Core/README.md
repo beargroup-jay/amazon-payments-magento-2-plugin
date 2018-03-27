@@ -9,8 +9,8 @@ modules.
 
 ##Dependencies
 
-You can find a list of modules in the require section of the composer.json file located in the 
-same directory as this README.md file.  Amazon_Core does not have any standalone functionality
+You can find a list of modules in the require section of the `composer.json` file located in the
+same directory as this `README.md` file.  Amazon_Core does not have any standalone functionality
 but is required by Amazon_Login and Amazon_Payment.
 
 ##Extension Points

@@ -23,6 +23,7 @@ use Amazon\Core\Helper\CategoryExclusion;
 
 /**
  * Class ExcludedCategoryValidator
+ *
  * @package Amazon\Payment\Gateway\Validator
  */
 class ExcludedCategoryValidator extends AbstractValidator
@@ -40,16 +41,16 @@ class ExcludedCategoryValidator extends AbstractValidator
 
     /**
      * ExcludedCategoryValidator constructor.
+     *
      * @param ResultInterfaceFactory $resultFactory
-     * @param Config $config
-     * @param CategoryExclusion $categoryExclusion
+     * @param Config                 $config
+     * @param CategoryExclusion      $categoryExclusion
      */
     public function __construct(
         ResultInterfaceFactory $resultFactory,
         Config $config,
         CategoryExclusion $categoryExclusion
-    )
-    {
+    ) {
         $this->categoryExclusion = $categoryExclusion;
         $this->config = $config;
         parent::__construct($resultFactory);

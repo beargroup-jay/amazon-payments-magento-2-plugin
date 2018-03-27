@@ -23,8 +23,8 @@ interface ClientFactoryInterface
     /**
      * Create amazon client instance
      *
-     * @param null|int|string $scopeId
-     * @param null|int|string $scope
+     * @param  null|int|string $scopeId
+     * @param  null|int|string $scope
      * @return ClientInterface
      */
     public function create($scopeId = null, $scope = ScopeInterface::SCOPE_STORE);

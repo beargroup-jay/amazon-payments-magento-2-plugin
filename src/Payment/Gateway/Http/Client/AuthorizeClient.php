@@ -19,6 +19,7 @@ namespace Amazon\Payment\Gateway\Http\Client;
 
 /**
  * Class Client
+ *
  * @package Amazon\Payment\Gateway\Http\Client
  */
 class AuthorizeClient extends AbstractClient

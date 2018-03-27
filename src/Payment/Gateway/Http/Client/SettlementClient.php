@@ -20,6 +20,7 @@ use Amazon\Core\Exception\AmazonServiceUnavailableException;
 
 /**
  * Class SettlementClient
+ *
  * @package Amazon\Payment\Gateway\Http\Client
  */
 class SettlementClient extends AbstractClient
