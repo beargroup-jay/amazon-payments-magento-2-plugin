@@ -27,7 +27,7 @@ use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Psr\Log\LoggerInterface;
-use Amazon\Login\Api\Customer\CompositeMatcherInterface;
+use Amazon\Login\Api\Customer\MatcherInterface;
 use Amazon\Login\Api\CustomerLinkManagementInterface;
 
 /**
@@ -68,7 +68,7 @@ abstract class Login extends Action
     protected $accountRedirect;
 
     /**
-     * @var CompositeMatcherInterface
+     * @var MatcherInterface
      */
     protected $matcher;
 
@@ -93,18 +93,19 @@ abstract class Login extends Action
     protected $logger;
 
     /**
-     * @param AmazonCustomerFactory           $amazonCustomerFactory
-     * @param ClientFactoryInterface          $clientFactory
-     * @param LoggerInterface                 $logger
-     * @param AmazonCoreHelper                $amazonCoreHelper
-     * @param Url                             $customerUrl
-     * @param AccessTokenRequestValidator     $accessTokenRequestValidator
-     * @param AccountRedirect                 $accountRedirect
-     * @param CompositeMatcherInterface       $matcher
+     * Login constructor.
+     * @param Context $context
+     * @param AmazonCustomerFactory $amazonCustomerFactory
+     * @param ClientFactoryInterface $clientFactory
+     * @param AmazonCoreHelper $amazonCoreHelper
+     * @param Url $customerUrl
+     * @param AccessTokenRequestValidator $accessTokenRequestValidator
+     * @param AccountRedirect $accountRedirect
+     * @param MatcherInterface $matcher
      * @param CustomerLinkManagementInterface $customerLinkManagement
-     * @param CustomerSession                 $customerSession
-     * @param Session                         $session
-     * @param LoggerInterface                 $logger
+     * @param CustomerSession $customerSession
+     * @param Session $session
+     * @param LoggerInterface $logger
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -115,7 +116,7 @@ abstract class Login extends Action
         Url $customerUrl,
         AccessTokenRequestValidator $accessTokenRequestValidator,
         AccountRedirect $accountRedirect,
-        CompositeMatcherInterface $matcher,
+        MatcherInterface $matcher,
         CustomerLinkManagementInterface $customerLinkManagement,
         CustomerSession $customerSession,
         Session $session,
