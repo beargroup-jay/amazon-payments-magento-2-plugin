@@ -27,7 +27,7 @@ use Magento\Customer\Model\Url;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Psr\Log\LoggerInterface;
-use Amazon\Login\Api\Customer\MatcherInterface;
+use Amazon\Login\Model\Customer\MatcherInterface;
 use Amazon\Login\Api\CustomerLinkManagementInterface;
 
 /**

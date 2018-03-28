@@ -83,7 +83,6 @@ class CompleteAuthHandler implements HandlerInterface
             $message = __('Authorized amount of %1 online', $order->getGrandTotal());
             $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
 
-            $order->setStatus($this->coreHelper->getNewOrderStatus());
             $order->addStatusHistoryComment($message);
 
         }

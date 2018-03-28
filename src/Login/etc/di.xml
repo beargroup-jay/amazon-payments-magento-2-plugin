@@ -5,7 +5,7 @@
     <preference for="Amazon\Login\Api\CustomerManagementInterface" type="Amazon\Login\Model\CustomerManagement" />
     <preference for="Amazon\Login\Api\Data\CustomerLinkInterface" type="Amazon\Login\Model\ResourceModel\CustomerLink" />
     <preference for="Amazon\Login\Api\Data\CustomerLinkSearchResultsInterface" type="Magento\Framework\Api\SearchResults" />
-    <type name="Amazon\Login\Api\Customer\MatcherInterface">
+    <type name="Amazon\Login\Model\Customer\MatcherInterface">
         <arguments>
             <argument name="matchers" xsi:type="array">
                 <item name="sessionmatcher" xsi:type="object">Amazon\Login\Model\Customer\SessionMatcher</item>

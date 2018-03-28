@@ -104,7 +104,6 @@ class SettlementHandler implements HandlerInterface
                 $message = __('Captured amount of %1 online', $order->getGrandTotal());
                 $message .= ' ' . __('Transaction ID: "%1"', $quoteLink->getAmazonOrderReferenceId());
 
-                $order->setStatus($this->coreHelper->getNewOrderStatus());
                 $order->addStatusHistoryComment($message);
 
             }

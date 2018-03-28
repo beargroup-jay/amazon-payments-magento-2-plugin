@@ -84,7 +84,6 @@ class CompleteSaleHandler implements HandlerInterface
             $message = __('Captured amount of %1 online', $order->getGrandTotal());
             $message .= ' ' . __('Transaction ID: "%1"', $amazonId);
 
-            $order->setStatus($this->coreHelper->getNewOrderStatus());
             $order->addStatusHistoryComment($message);
 
         }
