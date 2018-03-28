@@ -107,8 +107,8 @@ class SandboxSimulation implements ObserverInterface
         $simulationReference = null;
 
         $additionalInformation = $payment->getAdditionalInformation();
-        if (is_array($additionalInformation) 
-            && array_key_exists('sandbox_simulation_reference', $additionalInformation)
+        if (is_array($additionalInformation) &&
+            array_key_exists('sandbox_simulation_reference', $additionalInformation)
         ) {
             $simulationReference = $additionalInformation['sandbox_simulation_reference'];
         }

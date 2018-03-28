@@ -50,18 +50,10 @@ class ExcludedCategoryQuoteItemAddition implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        /**
-* 
-         *
- * @see \Magento\Quote\Model\Quote::addProduct() 
-*/
+        /** @see \Magento\Quote\Model\Quote::addProduct() */
 
         if ($this->coreHelper->isPwaEnabled()) {
-            /**
-* 
-             *
- * @var \Magento\Quote\Model\Quote\Item\AbstractItem $quoteItem 
-*/
+            /** @var \Magento\Quote\Model\Quote\Item\AbstractItem $quoteItem */
             foreach ($observer->getItems() as $quoteItem) {
                 $isExcludedProduct = $this->categoryExclusionHelper->productHasExcludedCategory(
                     $quoteItem->getProduct()

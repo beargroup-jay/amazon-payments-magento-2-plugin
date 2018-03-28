@@ -64,11 +64,7 @@ class ProductPagePaymentLink extends PaymentLink
             return '';
         }
 
-        /**
-* 
-         *
- * @var \Magento\Catalog\Model\Product $product 
-*/
+        /** @var \Magento\Catalog\Model\Product $product */
         $product = $this->registry->registry('product');
 
         if ($product instanceof Product 

@@ -33,11 +33,7 @@ class PendingRefund extends AbstractDb
      */
     protected function _getLoadSelect($field, $value, $object)
     {
-        /**
-* 
-         *
- * @var \Amazon\Payment\Model\PendingRefund $object 
-*/
+        /** @var \Amazon\Payment\Model\PendingRefund $object */
         $select = parent::_getLoadSelect($field, $value, $object);
         $select->forUpdate($object->hasLockOnLoad());
 

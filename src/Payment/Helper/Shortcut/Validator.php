@@ -121,11 +121,7 @@ class Validator implements ValidatorInterface
     {
         if ($isInCatalog) {
             // Show PayPal shortcut on a product view page only if product has nonzero price
-            /**
-* 
-             *
- * @var $currentProduct \Magento\Catalog\Model\Product 
-*/
+            /** @var $currentProduct \Magento\Catalog\Model\Product */
             $currentProduct = $this->registry->registry('current_product');
             if ($currentProduct !== null) {
                 $productPrice = (double)$currentProduct->getFinalPrice();
@@ -150,11 +146,7 @@ class Validator implements ValidatorInterface
     public function isMethodAvailable($paymentCode)
     {
         // check payment method availability
-        /**
-* 
-         *
- * @var \Magento\Payment\Model\Method\AbstractMethod $methodInstance 
-*/
+        /** @var \Magento\Payment\Model\Method\AbstractMethod $methodInstance */
         $methodInstance = $this->paymentData->getMethodInstance($paymentCode);
         if (!$methodInstance->isAvailable()) {
             return false;

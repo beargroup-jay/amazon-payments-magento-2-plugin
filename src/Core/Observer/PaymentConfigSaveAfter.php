@@ -98,11 +98,7 @@ class PaymentConfigSaveAfter implements ObserverInterface
             $this->jsonCredentials->processCredentialsJson($jsonCredentials, $scopeData);
         }
 
-        /**
-* 
-         *
- * @see \Magento\Config\Model\Config::save() 
-*/
+        /** @see \Magento\Config\Model\Config::save() */
         $validator = $this->apiCredentialsValidator->create();
 
         $messageManagerMethod = 'addErrorMessage';

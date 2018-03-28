@@ -75,11 +75,7 @@ class CheckoutValidator implements ValidatorInterface
     {
         $quote = $isInCatalog ? null : $this->_checkoutSession->getQuote();
         // check payment method availability
-        /**
-* 
-         *
- * @var \Magento\Payment\Model\Method\AbstractMethod $methodInstance 
-*/
+        /** @var \Magento\Payment\Model\Method\AbstractMethod $methodInstance */
         $methodInstance = $this->_paymentData->getMethodInstance($paymentCode);
         if (!$methodInstance->isAvailable($quote)) {
             return false;

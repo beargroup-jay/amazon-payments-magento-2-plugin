@@ -75,11 +75,7 @@ class UpgradeData implements UpgradeDataInterface
             'unsigned' => true
         ];
 
-        /**
-* 
-         *
- * @var \Magento\Quote\Setup\QuoteSetup $quoteSetup 
-*/
+        /** @var \Magento\Quote\Setup\QuoteSetup $quoteSetup */
         $quoteSetup = $this->quoteSetupFactory->create(['setup' => $setup]);
 
         $quoteSetup->addAttribute('quote_item', CategoryExclusion::ATTR_QUOTE_ITEM_IS_EXCLUDED_PRODUCT, $options);
