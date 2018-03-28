@@ -13,25 +13,16 @@ class Config extends \Magento\Payment\Gateway\Config\Config
 
     const AMAZON_ACTIVE = 'payment/amazon_payment/active';
 
+    const KEY_ACTIVE = 'active';
+
     /**
-     * Check whether payment method can be used
+     * Gets Payment configuration status.
      *
-     * @param      \Magento\Quote\Api\Data\CartInterface|null $quote
-     * @return     bool
-     * @deprecated 100.2.0
+     * @param int|null $storeId
+     * @return bool
      */
-    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    public function isActive($storeId = null)
     {
-        $storeId = 0;
-
-        if ($quote && $quote->getStoreId()) {
-            $storeId = $quote->getStoreId();
-        }
-
-        if (!$this->getValue(self::AMAZON_ACTIVE, $storeId)) {
-            return false;
-        }
-
-        return true;
+        return (bool) $this->getValue(self::KEY_ACTIVE, $storeId);
     }
 }
