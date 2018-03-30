@@ -47,6 +47,7 @@ class DeveloperLogs extends \Magento\Config\Block\System\Config\Form\Field
     /**
      * DeveloperLogs constructor.
      * @param Context $context
+     * @param DirectoryList $directoryList
      * @param UrlInterface $urlBuilder
      * @param array $data
      */

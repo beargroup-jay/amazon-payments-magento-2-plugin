@@ -11,8 +11,6 @@ class Config extends \Magento\Payment\Gateway\Config\Config
 
     const PLATFORM_ID = 'A2ZAYEJU54T1BM';
 
-    const AMAZON_ACTIVE = 'payment/amazon_payment/active';
-
     const KEY_ACTIVE = 'active';
 
     /**
