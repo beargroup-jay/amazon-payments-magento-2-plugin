@@ -113,7 +113,7 @@ class AuthorizationRequest implements BuilderInterface
                 'custom_information' =>
                     'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
                     'Plugin Version : ' . $this->coreHelper->getVersion(),
-                'platform_id' => $this->config::PLATFORM_ID,
+                'platform_id' => $this->config->getValue('platform_id'),
                 'request_payment_authorization' => true
             ];
         }
