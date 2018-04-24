@@ -424,7 +424,7 @@ class SimplePath
     {
         if (!$this->getConfig('payment/amazon_payment/active')) {
             $this->config->saveConfig('payment/amazon_payment/active', true, $this->_scope, $this->_scopeId);
-            $this->messageManager->addSuccess(__("Login and Pay with Amazon is now enabled."));
+            $this->messageManager->addSuccessMessage(__("Login and Pay with Amazon is now enabled."));
         }
     }
 
@@ -436,7 +436,7 @@ class SimplePath
         $baseUrl = $this->storeManager->getStore($this->_storeId)->getBaseUrl(UrlInterface::URL_TYPE_WEB, true);
         $baseUrl = str_replace('http:', 'https:', $baseUrl);
         $params  = 'website=' . $this->_websiteId . '&store=' . $this->_storeId . '&scope=' . $this->_scope;
-        return $baseUrl . 'amazon_core/simplepath/listener?' . $params;
+        return $baseUrl . 'amazon_core/simplepath/listener?' . urlencode($params);
     }
 
     /**

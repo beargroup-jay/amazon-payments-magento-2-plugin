@@ -49,7 +49,7 @@ class JsOrigin extends BaseField
             $valueReturn .= "<div>".$uniqueUrl."</div>";
         }
 
-        return '<td class="value">' . $valueReturn . '</td>';
+        return $this->escapeHtml('<td class="value">' . $valueReturn . '</td>');
     }
 
     /**
