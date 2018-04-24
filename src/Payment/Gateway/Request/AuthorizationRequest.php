@@ -13,6 +13,7 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 namespace Amazon\Payment\Gateway\Request;
 
 use Magento\Payment\Gateway\ConfigInterface;
@@ -23,6 +24,7 @@ use Amazon\Core\Helper\Data;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\DataObject;
 use Amazon\Payment\Plugin\AdditionalInformation;
+use Amazon\Core\Helper\CategoryExclusion;
 
 class AuthorizationRequest implements BuilderInterface
 {
@@ -52,27 +54,37 @@ class AuthorizationRequest implements BuilderInterface
     private $eventManager;
 
     /**
+     * @var CategoryExclusion
+     */
+    private $categoryExclusion;
+
+    /**
      * AuthorizationRequest constructor.
      *
-     * @param ConfigInterface  $config
-     * @param ProductMetadata  $productMetadata
-     * @param SubjectReader    $subjectReader
-     * @param Data             $coreHelper
+     * @param ConfigInterface $config
+     * @param ProductMetadata $productMetadata
+     * @param SubjectReader $subjectReader
+     * @param Data $coreHelper
      * @param ManagerInterface $eventManager
+     * @param CategoryExclusion $categoryExclusion
      */
     public function __construct(
         ConfigInterface $config,
         ProductMetaData $productMetadata,
         SubjectReader $subjectReader,
         Data $coreHelper,
-        ManagerInterface $eventManager
-    ) {
+        ManagerInterface $eventManager,
+        CategoryExclusion $categoryExclusion
+    )
+    {
         $this->config = $config;
         $this->coreHelper = $coreHelper;
         $this->productMetaData = $productMetadata;
         $this->subjectReader = $subjectReader;
         $this->eventManager = $eventManager;
+        $this->categoryExclusion = $categoryExclusion;
     }
+
     /**
      * Builds ENV request
      *
@@ -91,55 +103,56 @@ class AuthorizationRequest implements BuilderInterface
 
         $quote = $this->subjectReader->getQuote();
 
-        if (!$quote->getReservedOrderId()) {
-            try {
-                $quote->reserveOrderId()->save();
+        if (!$this->categoryExclusion->isQuoteDirty()) {
+            if (!$quote->getReservedOrderId()) {
+                try {
+                    $quote->reserveOrderId()->save();
+                } catch (\Exception $e) {
+                    $this->logger->debug($e->getMessage());
+                }
             }
-            catch(\Exception $e) {
-                $this->logger->debug($e->getMessage());
+
+            $amazonId = $this->subjectReader->getAmazonId();
+
+            if ($order && $amazonId) {
+
+                $data = [
+                    'amazon_order_reference_id' => $amazonId,
+                    'amount' => $buildSubject['amount'],
+                    'currency_code' => $order->getCurrencyCode(),
+                    'seller_order_id' => $order->getOrderIncrementId(),
+                    'store_name' => $quote->getStore()->getName(),
+                    'custom_information' =>
+                        'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
+                        'Plugin Version : ' . $this->coreHelper->getVersion(),
+                    'platform_id' => $this->config->getValue('platform_id'),
+                    'request_payment_authorization' => true
+                ];
             }
-        }
 
-        $amazonId = $this->subjectReader->getAmazonId();
+            if ($this->coreHelper->isSandboxEnabled('store', $quote->getStoreId())) {
 
-        if ($order && $amazonId) {
+                $data['additional_information'] =
+                    $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
 
-            $data = [
-                'amazon_order_reference_id' => $amazonId,
-                'amount' => $buildSubject['amount'],
-                'currency_code' => $order->getCurrencyCode(),
-                'seller_order_id' => $order->getOrderIncrementId(),
-                'store_name' => $quote->getStore()->getName(),
-                'custom_information' =>
-                    'Magento Version : ' . $this->productMetaData->getVersion() . ' ' .
-                    'Plugin Version : ' . $this->coreHelper->getVersion(),
-                'platform_id' => $this->config->getValue('platform_id'),
-                'request_payment_authorization' => true
-            ];
-        }
+                $eventData = [
+                    'amazon_order_reference_id' => $amazonId,
+                    'authorization_amount' => $buildSubject['amount'],
+                    'currency_code' => $order->getCurrencyCode(),
+                    'authorization_reference_id' => $amazonId . '-A' . time(),
+                    'capture_now' => false,
+                ];
 
-        if ($this->coreHelper->isSandboxEnabled('store', $quote->getStoreId())) {
-
-            $data['additional_information'] =
-                $payment->getAdditionalInformation(AdditionalInformation::KEY_SANDBOX_SIMULATION_REFERENCE);
-
-            $eventData = [
-                'amazon_order_reference_id'  => $amazonId,
-                'authorization_amount'       => $buildSubject['amount'],
-                'currency_code'              => $order->getCurrencyCode(),
-                'authorization_reference_id' => $amazonId . '-A' . time(),
-                'capture_now'                => false,
-            ];
-
-            $transport = new DataObject($eventData);
-            $this->eventManager->dispatch(
-                'amazon_payment_authorize_before',
-                [
-                    'context'   => 'authorization',
-                    'payment'   => $paymentDO->getPayment(),
-                    'transport' => $transport
-                ]
-            );
+                $transport = new DataObject($eventData);
+                $this->eventManager->dispatch(
+                    'amazon_payment_authorize_before',
+                    [
+                        'context' => 'authorization',
+                        'payment' => $paymentDO->getPayment(),
+                        'transport' => $transport
+                    ]
+                );
+            }
         }
 
         return $data;
