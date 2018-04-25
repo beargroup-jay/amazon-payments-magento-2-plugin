@@ -32,18 +32,13 @@ class ConstraintValidator extends AbstractValidator
      */
     public function validate(array $validationSubject)
     {
-
-
         $response = $validationSubject['response'];
 
         if (isset($response['constraints']) && $response['constraints']) {
-            foreach ($response['constraints'] as $constraint) {
-                return $this->createResult(
-                    false,
-                    [__('Gateway rejected the transaction. ').' '.$constraint->getDescription()]
-                );
-
-            }
+            return $this->createResult(
+                false,
+                [__('Gateway rejected the transaction. Constraints found.')]
+            );
         }
 
 
