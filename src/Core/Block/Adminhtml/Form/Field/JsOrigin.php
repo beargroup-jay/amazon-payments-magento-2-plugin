@@ -40,7 +40,7 @@ class JsOrigin extends BaseField
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_WEB, true);
             if ($baseUrl) {
                 $uri        = UriFactory::factory($baseUrl);
-                $urlArray[] = $uri->getScheme() . '://' . $uri->getHost();
+                $urlArray[] = $this->escapeHtml($uri->getScheme() . '://' . $uri->getHost());
             }
         }
 
@@ -49,7 +49,7 @@ class JsOrigin extends BaseField
             $valueReturn .= "<div>".$uniqueUrl."</div>";
         }
 
-        return $this->escapeHtml('<td class="value">' . $valueReturn . '</td>');
+        return '<td class="value">' . $valueReturn . '</td>';
     }
 
     /**

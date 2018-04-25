@@ -38,7 +38,7 @@ class RedirectUrl extends BaseField
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_WEB, true);
             if ($baseUrl) {
                 $value      = $baseUrl . 'amazon/login/processAuthHash/';
-                $urlArray[] = "<div>".$value."</div>";
+                $urlArray[] = "<div>".$this->escapeHtml($value)."</div>";
             }
         }
 
@@ -47,7 +47,7 @@ class RedirectUrl extends BaseField
             $valueReturn .= "<div>".$uniqueUrl."</div>";
         }
 
-        return $this->escapeHtml('<td class="value">' . $valueReturn . '</td>');
+        return '<td class="value">' . $valueReturn . '</td>';
     }
 
     /**

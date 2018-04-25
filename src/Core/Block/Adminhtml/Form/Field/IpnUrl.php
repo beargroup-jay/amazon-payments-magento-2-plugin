@@ -38,7 +38,7 @@ class IpnUrl extends BaseField
             $baseUrl = $store->getBaseUrl(UrlInterface::URL_TYPE_WEB, true);
             if ($baseUrl) {
                 $value      = $baseUrl . 'amazonpayments/payment/ipn/';
-                $urlArray[] = "<div>".$value."</div>";
+                $urlArray[] = "<div>".$this->escapeHtml($value)."</div>";
             }
         }
 
@@ -47,7 +47,7 @@ class IpnUrl extends BaseField
             $valueReturn .= "<div>".$uniqueUrl."</div>";
         }
 
-        return $this->escapeHtml('<td class="value">' . $valueReturn . '</td>');
+        return '<td class="value">' . $valueReturn . '</td>';
     }
 
     /**
