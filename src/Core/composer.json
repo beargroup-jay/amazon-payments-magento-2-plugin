@@ -9,6 +9,7 @@
   "require": {
     "magento/framework": "^100.1.0|^101.0.0",
     "magento/module-config": "^100.1.0|^101.0.0",
+    "magento/module-customer": "^100.1.0",
     "magento/module-store": "^100.1.0",
     "magento/module-developer": "^100.1.0",
     "magento/module-quote": "^100.1.0|^101.0.0",

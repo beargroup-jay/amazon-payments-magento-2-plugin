@@ -13,7 +13,7 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-namespace Amazon\Login\Setup;
+namespace Amazon\Core\Setup;
 
 use Amazon\Login\Model\ResourceModel\CustomerLink;
 use Magento\Framework\DB\Adapter\AdapterInterface;
