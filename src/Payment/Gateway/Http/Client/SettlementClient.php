@@ -25,8 +25,6 @@ use Amazon\Core\Exception\AmazonServiceUnavailableException;
  */
 class SettlementClient extends AbstractClient
 {
-
-
     /**
      * @inheritdoc
      */
@@ -35,7 +33,7 @@ class SettlementClient extends AbstractClient
         $response = [];
 
         // check to see if authorization is still valid
-        if ($this->checkAuthorizationStatus($data)) {
+        if ($this->adapter->checkAuthorizationStatus($data)) {
             $captureData = [
                 'amazon_authorization_id' => $data['amazon_authorization_id'],
                 'capture_amount' => $data['capture_amount'],
@@ -43,7 +41,7 @@ class SettlementClient extends AbstractClient
                 'capture_reference_id' => $data['amazon_order_reference_id'] . '-C' . time()
             ];
 
-            $response = $this->completeCapture($captureData, $data['store_id']);
+            $response = $this->adapter->completeCapture($captureData, $data['store_id']);
         } else {
             // if invalid - reauthorize and capture
             $captureData = [
@@ -55,85 +53,15 @@ class SettlementClient extends AbstractClient
                 'custom_information' => $data['custom_information'],
                 'platform_id' => $data['platform_id']
             ];
-            $response = $this->authorize($data, true);
+            $response = $this->adapter->authorize($data, true);
             $response['reauthorized'] = true;
         }
 
         return $response;
     }
 
-    /**
-     * @param $data
-     * @param $storeId
-     * @return null
-     * @throws AmazonServiceUnavailableException
-     */
-    private function completeCapture($data, $storeId)
-    {
-        $response = [
-            'status' => false
-        ];
-
-        try {
-            $responseParser = $this->clientFactory->create($storeId)->capture($data);
-            if ($responseParser->response['Status'] == 200) {
-                $captureResponse = $this->amazonCaptureResponseFactory->create(['response' => $responseParser]);
-                $capture = $captureResponse->getDetails();
-
-                if (in_array($capture->getStatus()->getState(), self::SUCCESS_CODES)) {
-                    $response = [
-                        'status' => true,
-                        'transaction_id' => $capture->getTransactionId(),
-                        'reauthorized' => false
-                    ];
-                } elseif ($capture->getStatus()->getState() == 'Pending') {
-                    $order = $this->subjectReader->getOrder();
-
-                    $this->pendingCaptureFactory->create()
-                        ->setCaptureId($capture->getTransactionId())
-                        ->setOrderId($order->getId())
-                        ->setPaymentId($order->getPayment()->getEntityId())
-                        ->save();
-                } else {
-                    $response['response_code'] = $capture->getReasonCode();
-                }
-            }
-
-        } catch (\Exception $e) {
-            $log['error'] = $e->getMessage();
-            $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
-        }
-
-        return $response;
-    }
 
 
-    /**
-     * @param $data
-     * @return bool
-     * @throws AmazonServiceUnavailableException
-     */
-    private function checkAuthorizationStatus($data)
-    {
 
-        $authorizeData = [
-            'amazon_authorization_id' => $data['amazon_authorization_id']
-        ];
 
-        $storeId = $data['store_id'];
-
-        try {
-            $responseParser = $this->clientFactory->create($storeId)->getAuthorizationDetails($authorizeData);
-            if ($responseParser->response['Status'] != 200) {
-                return false;
-            }
-        } catch (\Exception $e) {
-            $log['error'] = $e->getMessage();
-            $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
-        }
-
-        return true;
-    }
 }

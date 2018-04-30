@@ -30,7 +30,7 @@ class AuthorizeClient extends AbstractClient
      */
     protected function process(array $data)
     {
-        return $this->authorize($data, false);
+        return $this->adapter->authorize($data, false);
     }
 
 }

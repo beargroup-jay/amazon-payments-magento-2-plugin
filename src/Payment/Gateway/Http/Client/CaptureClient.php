@@ -30,6 +30,6 @@ class CaptureClient extends AbstractClient
      */
     protected function process(array $data)
     {
-        return $this->authorize($data, true);
+        return $this->adapter->authorize($data, true);
     }
 }

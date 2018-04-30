@@ -20,7 +20,6 @@ use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
 use Amazon\Core\Client\ClientFactoryInterface;
-use Amazon\Core\Exception\AmazonServiceUnavailableException;
 use Amazon\Payment\Domain\AmazonRefundResponseFactory;
 
 /**
@@ -87,7 +86,6 @@ class RefundClient implements ClientInterface
             $message = __($e->getMessage() ?: "Something went wrong during Gateway request.");
             $log['error'] = $message;
             $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
         } finally {
             $log['response'] = (array)$response;
             $this->logger->debug($log);
@@ -116,7 +114,6 @@ class RefundClient implements ClientInterface
         } catch (\Exception $e) {
             $log['error'] = $e->getMessage();
             $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
         }
 
         $response['state'] = $refund->getRefundStatus()->getState();

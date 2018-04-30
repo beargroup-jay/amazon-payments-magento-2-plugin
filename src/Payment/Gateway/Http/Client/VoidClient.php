@@ -16,7 +16,6 @@
 
 namespace Amazon\Payment\Gateway\Http\Client;
 
-use Amazon\Core\Exception\AmazonServiceUnavailableException;
 
 /**
  * Class VoidClient
@@ -35,21 +34,18 @@ class VoidClient extends AbstractClient
         unset($data['store_id']);
 
         $response = [
-          'status' => false
+            'status' => false
         ];
 
-        try {
-            $client = $this->clientFactory->create($store_id);
-            $responseParser = $client->cancelOrderReference($data);
+        $client = $this->clientFactory->create($store_id);
+        $responseParser = $client->cancelOrderReference($data);
 
-            if ($responseParser->response['Status'] == 200) {
-                // Gateway expects response to be in form of array
-                $response['status'] = true;
-            }
-        } catch (\Exception $e) {
-            $log['error'] = $e->getMessage();
+        if ($responseParser->response['Status'] == 200) {
+            // Gateway expects response to be in form of array
+            $response['status'] = true;
+        } else {
+            $log['error'] = __('VoidClient - Unable to Close/Cancel order - bad status response.');
             $this->logger->debug($log);
-            throw new AmazonServiceUnavailableException();
         }
 
         return $response;
