@@ -15,11 +15,10 @@
  */
 namespace Amazon\Core\Setup;
 
-use Amazon\Login\Model\ResourceModel\CustomerLink;
-use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\UpgradeSchemaInterface;
+use Magento\Quote\Setup\QuoteSetupFactory;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
