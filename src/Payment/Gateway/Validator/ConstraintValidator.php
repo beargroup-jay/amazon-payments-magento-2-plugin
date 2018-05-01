@@ -19,7 +19,6 @@ namespace Amazon\Payment\Gateway\Validator;
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterface;
 use Amazon\Payment\Gateway\Http\Client\Client;
-use Amazon\Payment\Domain\AmazonConstraint;
 
 class ConstraintValidator extends AbstractValidator
 {
@@ -40,7 +39,6 @@ class ConstraintValidator extends AbstractValidator
                 [__('Gateway rejected the transaction. Constraints found.')]
             );
         }
-
 
         return $this->createResult(
             true,

@@ -34,7 +34,27 @@
         </arguments>
     </virtualType>
     <!-- Amazon validators infrastructure -->
-    
+
+
+    <!-- Amazon error code mapper -->
+
+    <virtualType name="Amazon\Payment\Gateway\ErrorMapper\VirtualConfigReader" type="Magento\Payment\Gateway\ErrorMapper\VirtualConfigReader">
+        <arguments>
+            <argument name="fileName" xsi:type="string">amazon_error_mapping.xml</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Amazon\Payment\Gateway\ErrorMapper\VirtualMappingData" type="Magento\Payment\Gateway\ErrorMapper\MappingData">
+        <arguments>
+            <argument name="reader" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualConfigReader</argument>
+            <argument name="cacheId" xsi:type="string">amazon_error_mapper</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper" type="Magento\Payment\Gateway\ErrorMapper\ErrorMessageMapper">
+        <arguments>
+            <argument name="messageMapping" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualMappingData</argument>
+        </arguments>
+    </virtualType>
+
     <!-- Logger, initialized with Amazon Config -->
     <virtualType name="AmazonLogger" type="Magento\Payment\Model\Method\Logger">
         <arguments>
@@ -100,6 +120,7 @@
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\AuthorizeClient</argument>
+            <argument name="errorMessageMapper" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
     </virtualType>
 
@@ -117,6 +138,7 @@
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\CaptureClient</argument>
+            <argument name="errorMessageMapper" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
     </virtualType>
 
@@ -128,6 +150,7 @@
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\SettlementClient</argument>
+            <argument name="errorMessageMapper" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
     </virtualType>
 
@@ -148,6 +171,7 @@
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\RefundClient</argument>
+            <argument name="errorMessageMapper" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
     </virtualType>
 
@@ -159,6 +183,7 @@
             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
             <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\VoidClient</argument>
+            <argument name="errorMessageMapper" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
         </arguments>
     </virtualType>
 
